@@ -5,17 +5,49 @@
 //return a form with four inputs, each wired up to onChange
 import React, { useState } from "react";
 
+import {loadData, saveData} from './data.js'
+
+//to-do, link the users input to the database, storing data as part of the expenditures array inside of the defaultData object
+//call saveData to save the data in localStorage
+//create a submit button
+
+
+
+
 function ExpenditureForm() {
     const [name, setName] = useState("");
     const [amount, setAmount] = useState("");
     const [date, setDate] = useState("");
     const [category, setCategory] = useState("necessity"); //default value for category is "necessity"
-   
+    
+    function handleSubmit(e) //takes an event as input, I don't understand how handleSubmit is supposed to be inside another function, I've never seen a function declared inside a function before
+    {
+        e.preventDefault();
+        const newExpenditure = {
+            id: Date.now(),
+            name: name,
+            amount: amount,
+            date: date,
+            category: category
+        };
+
+        const data = loadData(); //we can get away with creating a new data object here because we know that loadData always returns data of the type defaultData 
+        data.expenditures.push(newExpenditure);
+        saveData(data)
+
+        setName("");
+        setAmount("");
+        setDate("");
+        setCategory("necessity");
+    }
+
+
     return (
-        <form> 
+        <form onSubmit={handleSubmit}> 
+        <button type ="submit"> Add Expenditure </button> {/*This creates a button, ties it to submit, and writes the plaintext Add Expenditure */}
         <input 
         placeholder = "Name" //placeholders act as default values before one has been assigned by the users input
-        value = {name}  
+        value = {name}  //value refers to the backend, stating that the value written in the field should be attached to the variable name(which has a useState established earlier)
         onChange={(e) => setName(e.target.value)} 
         /> {/*this will update the name state variable whenever the user types into the name input field*/}
         
@@ -30,12 +62,22 @@ function ExpenditureForm() {
         value = {date}
         onChange={(e) => setDate(e.target.value)    }
         /> {/*this will update the date state variable whenever the user types into the date input field*/}
-        
-        <input 
-        placeholder = "necessity"
+ 
+
+        <select
         value = {category}
-        onChange={(e) => setCategory(e.target.value)}
-        /> {/*this will update the category state variable whenever the user selects a different option in the category dropdown*/}
+        onChange = {(e) => setCategory(e.target.value)} 
+        >{/*Note it is important we attach a value setter and onChange to the select container but not the option as the options don't need to know this logic, only their container*/}
+            <option value = "necessity">
+            Necessity    
+            </option> {/*Important note that the value is what is recorded in the backend, the necessity in between the two options is what is displayed to the user */}
+            
+            <option value = "luxury"> 
+            Luxury
+            </option>
+        </select>
+
+      
         </form>
     );
 }
