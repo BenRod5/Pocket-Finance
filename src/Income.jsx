@@ -3,15 +3,26 @@ import { useState } from 'react' ;
 const Income = () => {
     //Define the globals
     const [source, setSource] = useState("");
-    const [amount, setAmount] = useState("");
+    const [amount, setAmount] = useState(0);
     const [date, setDate] = useState("");
+    const [isRecurring, setIsRecurring] = useState(false);
+    const [repeatAmount, setRepeatAmount] = useState("monthly");
+
+
+
+
     //Shows when save button is clicked
     const handleSave = () => {
             alert("Saved " + source + " (£" + amount + ") on " + date);
         };
 
     return(
-        <div style={{padding: '20px', border: '1px'}}>
+        <div style={{
+            padding: '20px',
+            border: '1px'
+        }}>
+
+            
             <h3>Add Income Source</h3>
 
             <input
@@ -36,7 +47,26 @@ const Income = () => {
                     value={date} 
                     onChange={(e) => setDate(e.target.value)} 
             />
+            <label>
+                <input
+                    type="checkbox"
+                    checked={isRecurring}
+                    onChange={(e) => setIsRecurring(e.target.checked)}
+                />
+                
+                Recurring Payement
+            </label>
+        {isRecurring && (
+            <select value={repeatAmount} onChange={(e) => setRepeatAmount(e.target.value)}>
+                <option value="weekly">Weekly</option>
+                <option value="biweekly">Bi-Weekly</option>
+                <option value="monthly">Monthly</option>
+            </select>
+	)}
+            
             <button onClick={handleSave}>Save Entry</button>
+
+
         </div>
     );
 
