@@ -4,7 +4,7 @@
 //write the four state declarations for the form inputs (name, amount, date, category)
 //return a form with four inputs, each wired up to onChange
 import React, { useState } from "react";
-
+import './Income.css'
 import {loadData, saveData} from './data.js'
 
 //to-do, link the users input to the database, storing data as part of the expenditures array inside of the defaultData object
@@ -48,17 +48,19 @@ function ExpenditureForm() {
 
 
     return (
+        <div className='container'>
         <form onSubmit={handleSubmit}> 
         <h3>Add Expenditure</h3> {/*Added a label to the expenditure section, good idea josh */}
 
-        <button type ="submit"> Add Expenditure </button> {/*This creates a button, ties it to submit, and writes the plaintext Add Expenditure */}
         <input 
+        type = "text"
         placeholder = "Name" //placeholders act as default values before one has been assigned by the users input
         value = {name}  //value refers to the backend, stating that the value written in the field should be attached to the variable name(which has a useState established earlier)
         onChange={(e) => setName(e.target.value)} 
         /> {/*this will update the name state variable whenever the user types into the name input field*/}
         
         <input 
+        type="text"
         placeholder = "0"
         value = {amount}
         onChange={(e) => setAmount(e.target.value)} 
@@ -85,9 +87,10 @@ function ExpenditureForm() {
             </option>
         </select>
 
-        <button onClick={handleSave}>Save Entry</button>
+        <button className='container' onClick={handleSave}>Save Entry</button>
 
         </form>
+        </div>
     );
 }
 

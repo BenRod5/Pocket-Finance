@@ -1,5 +1,5 @@
 import { useState } from 'react' ;
-
+import './Income.css'
 const Income = () => {
     //Define the globals
     const [source, setSource] = useState("");
@@ -17,12 +17,9 @@ const Income = () => {
         };
 
     return(
-        <div style={{
-            padding: '20px',
-            border: '1px'
-        }}>
+        <div className='container'>
+        
 
-            
             <h3>Add Income Source</h3>
 
             <input
@@ -64,7 +61,7 @@ const Income = () => {
             </select>
 	)}
             
-            <button onClick={handleSave}>Save Entry</button>
+            <button className='container' onClick={handleSave}>Save Entry</button>
 
 
         </div>
