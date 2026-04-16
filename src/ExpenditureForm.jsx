@@ -25,7 +25,31 @@ function ExpenditureForm() {
 
     function handleSubmit(e) //takes an event as input, I don't understand how handleSubmit is supposed to be inside another function, I've never seen a function declared inside a function before
     {
-        alert("Saved " + name + " (£" + amount + ") on " + date);
+
+        let valid = true;
+
+        if(name==""){
+            valid = false};
+        if(amount==0){
+            valid=false
+        } 
+        if(date == ""){
+            valid = false
+        }
+        
+        if(valid){
+            
+            const data = loadData(); //we can get away with creating a new data object here because we know that loadData always returns data of the type defaultData 
+            data.expenditures.push(newExpenditure);
+            saveData(data)
+
+            alert("Saved " + name + " (£" + amount + ") on " + date);
+
+        }
+        else{
+            alert("Invalid Input")
+        }
+
 
         e.preventDefault();
         const newExpenditure = {
@@ -36,9 +60,7 @@ function ExpenditureForm() {
             category: category
         };
 
-        const data = loadData(); //we can get away with creating a new data object here because we know that loadData always returns data of the type defaultData 
-        data.expenditures.push(newExpenditure);
-        saveData(data)
+
 
         setName("");
         setAmount("");
@@ -60,7 +82,7 @@ function ExpenditureForm() {
         /> {/*this will update the name state variable whenever the user types into the name input field*/}
         
         <input 
-        type="text"
+        type="number"
         placeholder = "0"
         value = {amount}
         onChange={(e) => setAmount(e.target.value)} 
