@@ -16,10 +16,15 @@ import {loadData, saveData} from './data.js'
 
 function ExpenditureForm() {
     const [name, setName] = useState("");
-    const [amount, setAmount] = useState("");
+    const [amount, setAmount] = useState(0);
     const [date, setDate] = useState("");
     const [category, setCategory] = useState("necessity"); //default value for category is "necessity"
     
+    const handleSave = () => {
+            alert("Saved " + name + " (£" + amount + ") on " + date);
+        };
+
+
     function handleSubmit(e) //takes an event as input, I don't understand how handleSubmit is supposed to be inside another function, I've never seen a function declared inside a function before
     {
         e.preventDefault();
@@ -60,9 +65,10 @@ function ExpenditureForm() {
         /> {/*this will update the amount state variable whenever the user types into the amount input field*/}
         
         <input 
-        placeholder = "00/00/0000"
-        value = {date}
-        onChange={(e) => setDate(e.target.value)    }
+        type="date" 
+        value={date} 
+        onChange={(e) => setDate(e.target.value)} 
+
         /> {/*this will update the date state variable whenever the user types into the date input field*/}
  
 
@@ -79,7 +85,8 @@ function ExpenditureForm() {
             </option>
         </select>
 
-      
+        <button onClick={handleSave}>Save Entry</button>
+
         </form>
     );
 }
