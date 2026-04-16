@@ -20,13 +20,13 @@ function ExpenditureForm() {
     const [date, setDate] = useState("");
     const [category, setCategory] = useState("necessity"); //default value for category is "necessity"
     
-    const handleSave = () => {
-            alert("Saved " + name + " (£" + amount + ") on " + date);
-        };
+
 
 
     function handleSubmit(e) //takes an event as input, I don't understand how handleSubmit is supposed to be inside another function, I've never seen a function declared inside a function before
     {
+        alert("Saved " + name + " (£" + amount + ") on " + date);
+
         e.preventDefault();
         const newExpenditure = {
             id: Date.now(),
@@ -87,7 +87,7 @@ function ExpenditureForm() {
             </option>
         </select>
 
-        <button className='container' onClick={handleSave}>Save Entry</button>
+        <button className='container' onSubmit>Save Entry</button>
 
         </form>
         </div>

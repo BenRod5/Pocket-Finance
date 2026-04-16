@@ -11,8 +11,23 @@ const Income = () => {
 
 
 
+
     //Shows when save button is clicked
     const handleSave = () => {
+        const entry = () => {
+            source,
+            amount,
+            date,
+            isRecurring,
+            repeatAmount
+            };
+
+            const data = loadData(); //we can get away with creating a new data object here because we know that loadData always returns data of the type defaultData 
+            data.income.push(entry);
+            saveData(data)
+            setSource("");
+            setAmount(0);
+        
             alert("Saved " + source + " (£" + amount + ") on " + date);
         };
 
@@ -63,8 +78,9 @@ const Income = () => {
             
             <button className='container' onClick={handleSave}>Save Entry</button>
 
-
+            
         </div>
+        
     );
 
 };
