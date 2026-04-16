@@ -44,6 +44,8 @@ function ExpenditureForm() {
 
     return (
         <form onSubmit={handleSubmit}> 
+        <h3>Add Expenditure</h3> {/*Added a label to the expenditure section, good idea josh */}
+
         <button type ="submit"> Add Expenditure </button> {/*This creates a button, ties it to submit, and writes the plaintext Add Expenditure */}
         <input 
         placeholder = "Name" //placeholders act as default values before one has been assigned by the users input
