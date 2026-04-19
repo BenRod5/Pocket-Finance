@@ -119,6 +119,16 @@ function ExpenditureForm() {
 
         <button className='container' onSubmit>Save Entry</button>
 
+        <h4>Expenditure History</h4>{/*basically a copied over version of income history */}
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+                {loadData().expenditures.map((item) => (
+                    <li key={item.id} style={{ marginBottom: '8px' }}>
+                        {item.name}: £{item.amount} — {item.date}
+                    </li>
+                ))}
+            </ul>
+
+
         </form>
         </div>
     );
