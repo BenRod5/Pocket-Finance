@@ -23,12 +23,20 @@ function ExpenditureForm() {
 
 
 
-    function handleSubmit(e) //takes an event as input, I don't understand how handleSubmit is supposed to be inside another function, I've never seen a function declared inside a function before
+    function handleSubmit(e) 
     {
-
+        e.preventDefault();//here it prevents the page reloading and the data we have already stored is safe
+        const newExpenditure = {//this should work instead
+            id: Date.now(),
+            name: name,
+            amount: amount,
+            date: date,
+            category: category
+        };
+       
         let valid = true;
 
-        if(name==""){
+        if(name==""){//ah I see this is for making sure the user hasn't inputted invalid data, nice
             valid = false};
         if(amount==0){
             valid=false
@@ -41,7 +49,7 @@ function ExpenditureForm() {
             
             const data = loadData(); //we can get away with creating a new data object here because we know that loadData always returns data of the type defaultData 
             data.expenditures.push(newExpenditure);
-            saveData(data)
+            saveData(data)//saves the values inputted in the form into localStorage
 
             alert("Saved " + name + " (£" + amount + ") on " + date);
 
@@ -51,14 +59,14 @@ function ExpenditureForm() {
         }
 
 
-        e.preventDefault();
-        const newExpenditure = {
-            id: Date.now(),
-            name: name,
-            amount: amount,
-            date: date,
-            category: category
-        };
+        // e.preventDefault();//this is fauling to prevent the default behaviour(a page reload) before it happens, it should be the first line in the form so the page doesn't reload
+        // const newExpenditure = { //also this newExpenditure is defined after it is used in the saving code, so we gotta move it upwards
+        //     id: Date.now(),
+        //     name: name,
+        //     amount: amount,
+        //     date: date,
+        //     category: category
+        // };
 
 
 
