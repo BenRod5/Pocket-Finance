@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import './Income.css'
 import {loadData, saveData} from './data.js'
 
-
+//to-do 
+//still need to implement the functionality for adding recurring expenditures, with the handleSubmit, duplicated dates method
 
 
 function ExpenditureForm() { //the function containing all our form logic
@@ -12,7 +13,8 @@ function ExpenditureForm() { //the function containing all our form logic
     const [category, setCategory] = useState("necessity"); //default value for category is "necessity"
     const [editingID, setEditingID] = useState("");//if editingID is "" then nothing needs to be edited if it contains an ID then we are editing values rather than adding a new value
     const [expenditures, setExpenditures] = useState(loadData().expenditures);// we need expenditures represented as state so that when it changes the expenditure list is updated
-
+    const [isRecurring, setIsRecurring] = useState(false);
+    const [repeatAmount, setRepeatAmount] = useState("monthly");
 
     //these variables name, amount, etc act as the contents of our input fields when the user presses submit. 
     //they are live values which change with each use input
@@ -27,7 +29,9 @@ function ExpenditureForm() { //the function containing all our form logic
                 name: name,
                 amount: amount,
                 date: date,
-                category: category
+                category: category,
+                isRecurring: isRecurring,
+                repeatAmount: isRecurring ? repeatAmount : null
             };
         
         
@@ -49,6 +53,13 @@ function ExpenditureForm() { //the function containing all our form logic
                 if(editingID == "")
                 {//add a value as normal
                     const data = loadData();//creates a new data object in line with what is returned by loadData, (either a blank defualtData object, see data.js, or the users previously filled out localStorage, also originally a defaultData object)
+                    // if(isRecurring)
+                    // {
+                    //     // if(repeatAmount=="monthly")
+                    //     // {//assuming this will be recurring for 
+
+                    //     // }
+                    // }
                     data.expenditures.push(newExpenditure);//pushes the new expenditure to the users data
                     saveData(data);//saves the edited data to localStorage
                     setExpenditures(data.expenditures);//updating the expenditures state once saveData is called so the display adjusts
@@ -78,6 +89,8 @@ function ExpenditureForm() { //the function containing all our form logic
         setDate("");
         setCategory("necessity");
         setEditingID("");
+        setIsRecurring(false);
+        setRepeatAmount("monthly");
     }
 
     function handleDelete(itemID)
@@ -141,6 +154,20 @@ function ExpenditureForm() { //the function containing all our form logic
             Luxury
             </option>
         </select>
+
+        <input
+            type="checkbox"
+            checked={isRecurring}
+            onChange={(e) => setIsRecurring(e.target.checked)}
+        />
+        Recurring Payment
+        {isRecurring && (
+        <select value = {repeatAmount} onChange = { (e) => setRepeatAmount (e.target.value)}>
+            <option value = "monthly"> Monthly </option>
+            <option value = "bi-Weekly"> Bi-Weekly </option>
+            <option value = "weekly"> Weekly </option>
+        </select>
+        )}
 
         <button className='container' onSubmit>Save Entry</button>
 
