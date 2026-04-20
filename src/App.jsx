@@ -5,6 +5,7 @@ import heroImg from './assets/hero.png'
 import './App.css'
 import ExpenditureForm from './ExpenditureForm'
 import Income from './Income'
+import { calculateExpendableIncome } from './data'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -34,7 +35,11 @@ function App() {
       <div>
         {activeTab === "income" ? <Income /> : < ExpenditureForm />}
       </div>
-    
+      <div>
+        <h2>
+          Balance: £{calculateExpendableIncome()}
+        </h2>
+      </div>
   
     </div>
   )

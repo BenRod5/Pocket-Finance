@@ -35,10 +35,12 @@ export function saveData(data) {
 
 
 // Task 1: Calculate the expendable income based on: (total income - expenditures).
-export function calculateExpendableIncome(data) {
+export function calculateExpendableIncome() {
   // Calculates both the total income and expenditure received from the user
   // and then calculates the difference between the two to find
+  
   // the expendable income.
+  const data = loadData()
   const totalIncome = data.income.reduce((sum, entry) => sum + entry.amount, 0);
   const totalExpenditure = data.expenditures.reduce((sum, entry) => sum + entry.amount, 0);
   const expendableIncome = totalIncome - totalExpenditure;
