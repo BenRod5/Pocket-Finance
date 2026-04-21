@@ -1,85 +1,123 @@
-//here we will write a function which returns 5 values (ID, Name, Amount, Date, Category) which will be used to create a new expenditure entry in the expenditures array of our data structure, we will also write a function to handle the form submission and update the data structure accordingly
-//to-do
-//write import useState from react 
-//write the four state declarations for the form inputs (name, amount, date, category)
-//return a form with four inputs, each wired up to onChange
 import React, { useState } from "react";
 import './Income.css'
 import {loadData, saveData} from './data.js'
 
-//to-do, link the users input to the database, storing data as part of the expenditures array inside of the defaultData object
-//call saveData to save the data in localStorage
-//create a submit button
+//to-do 
+//still need to implement the functionality for adding recurring expenditures, with the handleSubmit, duplicated dates method
 
 
-
-
-function ExpenditureForm() {
-    const [name, setName] = useState("");
+function ExpenditureForm() { //the function containing all our form logic
+    const [name, setName] = useState("");//establishing the variables name, amount, date, category in the back end, establishing an initial state and setter functions for each variable
     const [amount, setAmount] = useState(0);
     const [date, setDate] = useState("");
     const [category, setCategory] = useState("necessity"); //default value for category is "necessity"
-    
+    const [editingID, setEditingID] = useState("");//if editingID is "" then nothing needs to be edited if it contains an ID then we are editing values rather than adding a new value
+    const [expenditures, setExpenditures] = useState(loadData().expenditures);// we need expenditures represented as state so that when it changes the expenditure list is updated
+    const [isRecurring, setIsRecurring] = useState(false);
+    const [repeatAmount, setRepeatAmount] = useState("monthly");
+
+    //these variables name, amount, etc act as the contents of our input fields when the user presses submit. 
+    //they are live values which change with each use input
 
 
-
-    function handleSubmit(e) 
+    function handleSubmit(e) //the function that is called when the form needs to be submitted
     {
-        e.preventDefault();//here it prevents the page reloading and the data we have already stored is safe
-        const newExpenditure = {//this should work instead
-            id: Date.now(),
-            name: name,
-            amount: amount,
-            date: date,
-            category: category
-        };
-       
-        let valid = true;
-
-        if(name==""){//ah I see this is for making sure the user hasn't inputted invalid data, nice
-            valid = false};
-        if(amount==0){
-            valid=false
-        } 
-        if(date == ""){
-            valid = false
-        }
+        e.preventDefault();//preventDefault here stops the default page activity(reloading the page) before it can erase user data
         
-        if(valid){
+        const newExpenditure = {//this should work instead
+                id: Date.now(),//newExpenditure is an object which takes attributes from the values written by the user in the form
+                name: name,
+                amount: amount,
+                date: date,
+                category: category,
+                isRecurring: isRecurring,
+                repeatAmount: isRecurring ? repeatAmount : null
+            };
+        
+        
+        
+            let valid = true; //validation code to make sure the users input isn't blank
+
+            if(name==""){//ah I see this is for making sure the user hasn't inputted invalid data, nice
+                valid = false};
+            if(amount==0){
+                valid=false
+            } 
+            if(date == ""){
+                valid = false
+            }
             
-            const data = loadData(); //we can get away with creating a new data object here because we know that loadData always returns data of the type defaultData 
-            data.expenditures.push(newExpenditure);
-            saveData(data)//saves the values inputted in the form into localStorage
+            if(valid){
+                
+               
+                if(editingID == "")
+                {//add a value as normal
+                    const data = loadData();//creates a new data object in line with what is returned by loadData, (either a blank defualtData object, see data.js, or the users previously filled out localStorage, also originally a defaultData object)
+                    // if(isRecurring)
+                    // {
+                    //     // if(repeatAmount=="monthly")
+                    //     // {//assuming this will be recurring for 
 
-            alert("Saved " + name + " (£" + amount + ") on " + date);
+                    //     // }
+                    // }
+                    data.expenditures.push(newExpenditure);//pushes the new expenditure to the users data
+                    saveData(data);//saves the edited data to localStorage
+                    setExpenditures(data.expenditures);//updating the expenditures state once saveData is called so the display adjusts
+                    alert("Saved " + name + " (£" + amount + ") on " + date); //alerts the user as to the successful saving of their data.
+                }
+                else
+                {
+                    const data = loadData();
+                    // data.expenditures.map((item) => ) //not sure how the map version works
+                    const filteredArray =   data.expenditures.filter((item) => item.id != editingID); //filter out the element we are looking to edit
+                    data.expenditures = filteredArray;
+                    data.expenditures.push(newExpenditure);//push a new object with the users desired values as decided above
+                    saveData(data);//save the values
+                    setExpenditures(data.expenditures);//updating the expenditures state once saveData is called so the display adjusts
 
-        }
-        else{
-            alert("Invalid Input")
-        }
+                }
+               
+            }
+            else{
+                alert("Invalid Input");
+            }
+        
+       
 
-
-        // e.preventDefault();//this is fauling to prevent the default behaviour(a page reload) before it happens, it should be the first line in the form so the page doesn't reload
-        // const newExpenditure = { //also this newExpenditure is defined after it is used in the saving code, so we gotta move it upwards
-        //     id: Date.now(),
-        //     name: name,
-        //     amount: amount,
-        //     date: date,
-        //     category: category
-        // };
-
-
-
-        setName("");
+        setName("");//I assume this sets the state values back to default again
         setAmount("");
         setDate("");
         setCategory("necessity");
+        setEditingID("");
+        setIsRecurring(false);
+        setRepeatAmount("monthly");
+    }
+
+    function handleDelete(itemID)
+    {
+        const data = loadData();//loads user data
+        const filteredValues = data.expenditures.filter((item) => item.id!=itemID);//filter out all values with ID == itemID
+        data.expenditures = filteredValues; //put the filtered expenditures back in the whole data object
+        saveData(data);//return all values - that one filtered out ID
+        setExpenditures(data.expenditures);//updating the expenditures state once saveData is called so the display adjusts
+
+    }
+    
+    function handleEdit(itemID)
+    {//is called when the edit button is clicked in the expenditure list
+        const data = loadData();//loads user data from localStorage
+        const ourEntry = data.expenditures.find((item) => item.id ==itemID);//search the expenditures array for the ID equal to itemID
+        setEditingID(itemID);//fills in the form with values from the selected expenditure
+        setName(ourEntry.name);
+        setAmount(ourEntry.amount);
+        setCategory(ourEntry.category);
+        setDate(ourEntry.date); 
     }
 
 
     return (
         <div className='container'>
-        <form onSubmit={handleSubmit}> 
+        <form onSubmit={handleSubmit}> {/*The form with an attached handleSubmit function which does what it says */}
         <h3>Add Expenditure</h3> {/*Added a label to the expenditure section, good idea josh */}
 
         <input 
@@ -117,13 +155,40 @@ function ExpenditureForm() {
             </option>
         </select>
 
+        <input
+            type="checkbox"
+            checked={isRecurring}
+            onChange={(e) => setIsRecurring(e.target.checked)}
+        />
+        Recurring Payment
+        {isRecurring && (
+        <select value = {repeatAmount} onChange = { (e) => setRepeatAmount (e.target.value)}>
+            <option value = "monthly"> Monthly </option>
+            <option value = "bi-Weekly"> Bi-Weekly </option>
+            <option value = "weekly"> Weekly </option>
+        </select>
+        )}
+
         <button className='container' onSubmit>Save Entry</button>
 
-        <h4>Expenditure History</h4>{/*basically a copied over version of income history */}
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-                {loadData().expenditures.map((item) => (
-                    <li key={item.id} style={{ marginBottom: '8px' }}>
-                        {item.name}: £{item.amount} — {item.date}
+        <h4>Expenditure History</h4>{/*basically a copied over version of income history with some edit and delete button changes*/}
+            <ul style={{ listStyle: 'none', padding: 0, maxHeight: '300px', overflowY: 'auto' }}>
+
+                {expenditures.map((item) => (   
+                    <li key={item.id} style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+
+                        {item.name}: £{item.amount} {item.category}— {item.date} 
+                        <button 
+                        type="button" 
+                        onClick={() => handleEdit(item.id)}
+                        style={{ backgroundColor: 'black', color: 'white', border: 'none', padding: '2px 8px', cursor: 'pointer', borderRadius: '4px' }}
+                        >Edit</button>                        
+                        
+                        <button 
+                        type="button" 
+                        onClick={() => handleDelete(item.id)}
+                        style={{ backgroundColor: 'red', color: 'white', border: 'none', padding: '2px 8px', cursor: 'pointer', borderRadius: '4px' }}
+                        >Delete</button> 
                     </li>
                 ))}
             </ul>
