@@ -7,7 +7,7 @@ const IncomeGraph = () => {
   const dataObject = stored ? JSON.parse(stored) : { income: [], expenditures: [] };
   
   const incomeList = dataObject.income || [];
-  const expenditureList = dataObject.expenditures || []; // Fixed the spelling here!
+  const expenditureList = dataObject.expenditures || []; 
 
   // 2. Helper to sum up numbers for each month
   const getTotalsForMonth = (monthNum) => {
