@@ -6,15 +6,15 @@ import {loadData, saveData} from './data.js'
 //still need to implement the functionality for adding recurring expenditures, with the handleSubmit, duplicated dates method
 
 
-function ExpenditureForm() { //the function containing all our form logic
+function ExpenditureForm({ onAction }) { //the function containing all our form logic
     const [name, setName] = useState("");//establishing the variables name, amount, date, category in the back end, establishing an initial state and setter functions for each variable
     const [amount, setAmount] = useState(0);
     const [date, setDate] = useState("");
     const [category, setCategory] = useState("necessity"); //default value for category is "necessity"
     const [editingID, setEditingID] = useState("");//if editingID is "" then nothing needs to be edited if it contains an ID then we are editing values rather than adding a new value
-    const [expenditures, setExpenditures] = useState(loadData().expenditures);// we need expenditures represented as state so that when it changes the expenditure list is updated
     const [isRecurring, setIsRecurring] = useState(false);
     const [repeatAmount, setRepeatAmount] = useState("monthly");
+    const [expenditures, setExpenditures] = useState(loadData().expenditures);
 
     //these variables name, amount, etc act as the contents of our input fields when the user presses submit. 
     //they are live values which change with each use input
@@ -92,6 +92,7 @@ function ExpenditureForm() { //the function containing all our form logic
                     }
                     setExpenditures(data.expenditures);//updating the expenditures state once saveData is called so the display adjusts
                     alert("Saved " + name + " (£" + amount + ") on " + date); //alerts the user as to the successful saving of their data.
+                    if (onAction) onAction();
                 }
                 else
                 {
@@ -101,7 +102,8 @@ function ExpenditureForm() { //the function containing all our form logic
                     data.expenditures = filteredArray;
                     data.expenditures.push(newExpenditure);//push a new object with the users desired values as decided above
                     saveData(data);//save the values
-                    setExpenditures(data.expenditures);//updating the expenditures state once saveData is called so the display adjusts
+                    setExpenditures(...data.expenditures);//updating the expenditures state once saveData is called so the display adjusts
+                    if (onAction) onAction();
 
                 }
                
@@ -128,6 +130,7 @@ function ExpenditureForm() { //the function containing all our form logic
         data.expenditures = filteredValues; //put the filtered expenditures back in the whole data object
         saveData(data);//return all values - that one filtered out ID
         setExpenditures(data.expenditures);//updating the expenditures state once saveData is called so the display adjusts
+        if (onAction) onAction();
 
     }
     
@@ -140,6 +143,8 @@ function ExpenditureForm() { //the function containing all our form logic
         setAmount(ourEntry.amount);
         setCategory(ourEntry.category);
         setDate(ourEntry.date); 
+        if (onAction) onAction();
+
     }
 
 
