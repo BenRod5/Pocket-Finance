@@ -34,6 +34,7 @@ export function saveData(data) {
 }
 
 
+
 // Task 1: Calculate the expendable income based on: (total income - expenditures).
 export function calculateExpendableIncome() {
   // Calculates both the total income and expenditure received from the user
@@ -84,8 +85,37 @@ export function rolloverleftoverToNextMonth(data, newMonth) {
   // Saves and returns the data to the local storage (STORAGE_KEY).
   saveData(data);
   return data;
-
 }
+
+// export function calculateMonthlyOutgoings(){
+//   const data = loadData();
+//   const today = new Date;
+//   const lastDay = new Date( today.getFullYear() , today.getMonth() + 1 , 0 )
+
+//   const daysLeft = lastDay.getDate() - today.getDate()
+//   sumRemaining = data.expenditures.reduce((sum, exp) => {
+    
+//     if(exp.isRecurring){
+
+//       if(exp.repeatAmount == "weekly"){
+//         times = daysLeft / 7;
+//         sum + exp.amount * times;
+//       }
+//       else if(exp.repeatAmount == "biweekly"){
+//         times = daysLeft / 14;
+//         sum + exp.amount * times;
+//       }
+//       else{
+//         times = daysLeft / 30;
+//         sum + exp.amount * times;
+//       }
+      
+
+
+//     }
+//   }
+// }
+
 
 
 

@@ -19,7 +19,51 @@ function ExpenditureForm() { //the function containing all our form logic
     //these variables name, amount, etc act as the contents of our input fields when the user presses submit. 
     //they are live values which change with each use input
 
+    function validCheck(data){
+            let valid = true; //validation code to make sure the users input isn't blank
 
+            if(name==""){//ah I see this is for making sure the user hasn't inputted invalid data, nice
+                valid = false};
+            if(amount==0){
+                valid=false
+            } 
+            if(date == ""){
+                valid = false
+            }
+            return valid
+    }
+
+    function handleRecurring(data){
+        date = new Date();
+        let nextDate = new Date(data.date);
+        const today = new Date();
+        today = today - 20;
+        const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        if(!(nextDate > endOfMonth)){
+            while (true) {
+                if (data.repeatAmount === "weekly") {
+                    nextDate.setDate(nextDate.getDate() + 7);
+                } else if (data.repeatAmount === "biweekly") {
+                    nextDate.setDate(nextDate.getDate() + 14);
+                } else if (data.repeatAmount === "monthly") {
+                    nextDate.setMonth(nextDate.getMonth() + 1);
+                }
+                const newData = {
+                    id: nextDate,
+                    name: data.name,
+                    amount: data.amount,
+                    date: nextDate,
+                    category: data.category,
+                    isRecurring: data.isRecurring,
+                    repeatAmount: data.isRecurring ? data.repeatAmount : null
+                }
+
+                saveData(newData);
+                if (nextDate > endOfMonth) break;
+            }
+        }
+    }
+        
     function handleSubmit(e) //the function that is called when the form needs to be submitted
     {
         e.preventDefault();//preventDefault here stops the default page activity(reloading the page) before it can erase user data
@@ -34,34 +78,18 @@ function ExpenditureForm() { //the function containing all our form logic
                 repeatAmount: isRecurring ? repeatAmount : null
             };
         
-        
-        
-            let valid = true; //validation code to make sure the users input isn't blank
-
-            if(name==""){//ah I see this is for making sure the user hasn't inputted invalid data, nice
-                valid = false};
-            if(amount==0){
-                valid=false
-            } 
-            if(date == ""){
-                valid = false
-            }
+            valid = validCheck(newExpenditure);
             
             if(valid){
                 
-               
                 if(editingID == "")
                 {//add a value as normal
                     const data = loadData();//creates a new data object in line with what is returned by loadData, (either a blank defualtData object, see data.js, or the users previously filled out localStorage, also originally a defaultData object)
-                    // if(isRecurring)
-                    // {
-                    //     // if(repeatAmount=="monthly")
-                    //     // {//assuming this will be recurring for 
-
-                    //     // }
-                    // }
                     data.expenditures.push(newExpenditure);//pushes the new expenditure to the users data
                     saveData(data);//saves the edited data to localStorage
+                    if(data.isRecurring){
+                        handleRecurring(data);
+                    }
                     setExpenditures(data.expenditures);//updating the expenditures state once saveData is called so the display adjusts
                     alert("Saved " + name + " (£" + amount + ") on " + date); //alerts the user as to the successful saving of their data.
                 }
