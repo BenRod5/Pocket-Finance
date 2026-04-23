@@ -3,7 +3,7 @@
 
 //fun note about localStorage, it is unique to each user and stored on their browser, so even if they all have the same pocketFinanceData storage key, their data will never overlap which saves us a lot of complexity and the headache of storing their data on a server
 
-export const STORAGE_KEY = "pocketFinanceData"; //A key used to store all user data in localStorage, each user will have one defaultData object
+export const STORAGE_KEY = "pocketFinanceData2"; //A key used to store all user data in localStorage, each user will have one defaultData object
 
 
 export const defaultData = { //exported default data structure for any other file to access
@@ -44,6 +44,7 @@ export function calculateExpendableIncome() {
   const totalIncome = data.income.reduce((sum, entry) => sum + entry.amount, 0);
   const totalExpenditure = data.expenditures.reduce((sum, entry) => sum + entry.amount, 0);
   const expendableIncome = totalIncome - totalExpenditure;
+
   return expendableIncome;
 
 

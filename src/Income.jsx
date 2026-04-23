@@ -1,7 +1,7 @@
 import { useState } from 'react' ;
 import './Income.css'
 import { loadData, saveData } from './data.js'; 
-const Income = () => {
+const Income = ({ onAction }) => {
     //Define the globals
     const [source, setSource] = useState("");
     const [amount, setAmount] = useState(0);
@@ -43,6 +43,7 @@ const Income = () => {
             data.income.push(entry);
             saveData(data);
             alert("Saved " + source + " (£" + amount + ") on " + date);
+            if (onAction) onAction();
             setRefresh(prev => prev + 1); 
         }
         else{
@@ -93,7 +94,7 @@ const Income = () => {
                     onChange={(e) => setIsRecurring(e.target.checked)}
                 />
                 
-                Recurring Payement
+                Recurring Payment
             </label>
         {isRecurring && (
             <select value={repeatAmount} onChange={(e) => setRepeatAmount(e.target.value)}>
