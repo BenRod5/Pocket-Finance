@@ -33,35 +33,39 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
             return valid
     }
 
-    function handleRecurring(data){
-        date = new Date();
-        let nextDate = new Date(data.date);
-        const today = new Date();
-        today = today - 20;
+    function handleRecurring(entry){
+        const data = loadData();
+        let nextDate = new Date(entry.date);
+        const today = new Date("2026-04-01");        
         const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        if(!(nextDate > endOfMonth)){
+        if((nextDate.getMonth() == today.getMonth())){
             while (true) {
-                if (data.repeatAmount === "weekly") {
+                if (entry.repeatAmount === "weekly") {
                     nextDate.setDate(nextDate.getDate() + 7);
-                } else if (data.repeatAmount === "biweekly") {
+                } else if (entry.repeatAmount === "bi-weekly") {
                     nextDate.setDate(nextDate.getDate() + 14);
-                } else if (data.repeatAmount === "monthly") {
+                } else if (entry.repeatAmount === "monthly") {
                     nextDate.setMonth(nextDate.getMonth() + 1);
                 }
+
+                const dateString = nextDate.toLocaleDateString('en-CA')
+                if (dateString.slice(0,7) !== data.month) break;
                 const newData = {
-                    id: nextDate,
-                    name: data.name,
-                    amount: data.amount,
-                    date: nextDate,
-                    category: data.category,
-                    isRecurring: data.isRecurring,
-                    repeatAmount: data.isRecurring ? data.repeatAmount : null
+                    id: Date.now() + Math.random(),
+                    name: entry.name,
+                    amount: entry.amount,
+                    date: dateString,
+                    category: entry.category,
+                    isRecurring: entry.isRecurring,
+                    repeatAmount: entry.isRecurring ? entry.repeatAmount : null
                 }
 
-                saveData(newData);
-                if (nextDate > endOfMonth) break;
+                data.expenditures.push(newData);
+                if (nextDate.getMonth() != today.getMonth()) break;
             }
         }
+        saveData(data);
+        return data.expenditures;
     }
         
     function handleSubmit(e) //the function that is called when the form needs to be submitted
@@ -71,14 +75,14 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
         const newExpenditure = {//this should work instead
                 id: Date.now(),//newExpenditure is an object which takes attributes from the values written by the user in the form
                 name: name,
-                amount: amount,
+                amount: Number(amount),
                 date: date,
                 category: category,
                 isRecurring: isRecurring,
                 repeatAmount: isRecurring ? repeatAmount : null
             };
         
-            valid = validCheck(newExpenditure);
+            const valid = validCheck(newExpenditure);
             
             if(valid){
                 
@@ -87,10 +91,12 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                     const data = loadData();//creates a new data object in line with what is returned by loadData, (either a blank defualtData object, see data.js, or the users previously filled out localStorage, also originally a defaultData object)
                     data.expenditures.push(newExpenditure);//pushes the new expenditure to the users data
                     saveData(data);//saves the edited data to localStorage
-                    if(data.isRecurring){
-                        handleRecurring(data);
+                    if(isRecurring) {
+                        const updatedList = handleRecurring(newExpenditure);
+                        setExpenditures(updatedList);
+                    } else {
+                        setExpenditures(data.expenditures);
                     }
-                    setExpenditures(data.expenditures);//updating the expenditures state once saveData is called so the display adjusts
                     alert("Saved " + name + " (£" + amount + ") on " + date); //alerts the user as to the successful saving of their data.
                     if (onAction) onAction();
                 }
@@ -102,7 +108,7 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                     data.expenditures = filteredArray;
                     data.expenditures.push(newExpenditure);//push a new object with the users desired values as decided above
                     saveData(data);//save the values
-                    setExpenditures(...data.expenditures);//updating the expenditures state once saveData is called so the display adjusts
+                    setExpenditures(data.expenditures);                    
                     if (onAction) onAction();
 
                 }
@@ -197,7 +203,7 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
         {isRecurring && (
         <select value = {repeatAmount} onChange = { (e) => setRepeatAmount (e.target.value)}>
             <option value = "monthly"> Monthly </option>
-            <option value = "bi-Weekly"> Bi-Weekly </option>
+            <option value = "bi-weekly"> Bi-Weekly </option>
             <option value = "weekly"> Weekly </option>
         </select>
         )}
