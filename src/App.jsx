@@ -5,6 +5,7 @@ import heroImg from './assets/hero.png'
 import './App.css'
 import ExpenditureForm from './ExpenditureForm'
 import Income from './Income'
+import AskQuestionForm from  './AskQuestionForm.jsx'
 import { calculateExpendableIncome } from './data'
 
 function App() {
@@ -30,10 +31,19 @@ function App() {
           Expenses
         </button>
 
+        <button
+          className={activeTab ==="ask" ? "active" : ""}//don't wholly understand it but I can copy it from josh
+          onClick={() => setActiveTab("ask")}
+        >
+          Ask
+        </button>
+
       </div>
 
       <div>
-        {activeTab === "income" ? <Income /> : < ExpenditureForm />}
+        {activeTab === "income" ? <Income /> :""}
+        {activeTab === "expenses"?<ExpenditureForm/>: ""}
+        {activeTab === "ask" ? <AskQuestionForm />: ""}
       </div>
       <div>
         <h2>
