@@ -18,7 +18,7 @@ export const defaultData = { //exported default data structure for any other fil
   ],
   savingsGoal: 0,       // amount user wants to save this month
   spendingMoney: 0,     // expendable income minus savings goal
-  month: "2026-04"      // current active month, in "YYYY-MM" format, storing it this way makes it easy to compare and sort dates
+  month: "2026-05"      // current active month, in "YYYY-MM" format, storing it this way makes it easy to compare and sort dates
 };
 
 // Call this to load data from localStorage
@@ -42,9 +42,14 @@ export function calculateExpendableIncome() {
   
   // the expendable income.
   const data = loadData()
-  const totalIncome = data.income.reduce((sum, entry) => sum + entry.amount, 0);
-  const totalExpenditure = data.expenditures.reduce((sum, entry) => sum + entry.amount, 0);
-  const expendableIncome = totalIncome - totalExpenditure;
+  const todayStr = new Date().toISOString().split('T')[0];
+  console.log(todayStr)
+  const totalIncome = data.income
+      .filter(entry => entry.date <= todayStr)
+      .reduce((sum, entry) => sum + entry.amount, 0);  
+  const totalExpenditure = data.expenditures
+      .filter(entry => entry.date <= todayStr)
+      .reduce((sum, entry) => sum + entry.amount, 0);  const expendableIncome = totalIncome - totalExpenditure;
 
   return expendableIncome;
 
@@ -88,34 +93,7 @@ export function rolloverleftoverToNextMonth(data, newMonth) {
   return data;
 }
 
-// export function calculateMonthlyOutgoings(){
-//   const data = loadData();
-//   const today = new Date;
-//   const lastDay = new Date( today.getFullYear() , today.getMonth() + 1 , 0 )
 
-//   const daysLeft = lastDay.getDate() - today.getDate()
-//   sumRemaining = data.expenditures.reduce((sum, exp) => {
-    
-//     if(exp.isRecurring){
-
-//       if(exp.repeatAmount == "weekly"){
-//         times = daysLeft / 7;
-//         sum + exp.amount * times;
-//       }
-//       else if(exp.repeatAmount == "biweekly"){
-//         times = daysLeft / 14;
-//         sum + exp.amount * times;
-//       }
-//       else{
-//         times = daysLeft / 30;
-//         sum + exp.amount * times;
-//       }
-      
-
-
-//     }
-//   }
-// }
 
 
 

@@ -9,25 +9,74 @@ const Income = ({ onAction }) => {
     const [isRecurring, setIsRecurring] = useState(false);
     const [repeatAmount, setRepeatAmount] = useState("monthly");
     const [refresh, setRefresh] = useState(0);
+    const [incomes, setIncomes] = useState(loadData().income);
 
 
 
+
+    function handleRecurring(entry){
+        const data = loadData();
+        let nextDate = new Date(entry.date);
+        const today = new Date("2026-05-01");        
+        const stopDate = new Date("2026-07-01");
+        if((nextDate.getMonth() == today.getMonth())){
+            while (true) {
+                console.log(entry)
+                if (entry.repeatAmount === "weekly") {
+                    nextDate.setDate(nextDate.getDate() + 7);
+                } else if (entry.repeatAmount === "bi-weekly") {
+                    nextDate.setDate(nextDate.getDate() + 14);
+                } else if (entry.repeatAmount === "monthly") {
+                    nextDate.setMonth(nextDate.getMonth() + 1);
+                }
+
+                const dateString = nextDate.toLocaleDateString('en-CA')
+                console.log(dateString.slice(0,7))
+                console.log(data.month)
+                console.log(stopDate.toLocaleDateString('en-CA').slice(0,7))
+                if (dateString.slice(0,7) > stopDate.toLocaleDateString('en-CA').slice(0,7)) break;
+                const newData = {
+                    id: Date.now() + Math.random(),
+                    source: entry.source,
+                    amount: entry.amount,
+                    date: dateString,
+                    category: entry.category,
+                    isRecurring: entry.isRecurring,
+                    repeatAmount: entry.isRecurring ? entry.repeatAmount : null
+                }
+
+                data.income.push(newData);
+                console.log("Dates:")
+                console.log(nextDate.getMonth())
+                console.log(stopDate.getMonth())
+                if (nextDate.getMonth() > stopDate.getMonth()) break;
+            }
+        }
+        saveData(data);
+        return data.income;
+    }
 
     //Shows when save button is clicked
+
+
+
+
+    function validCheck(data){
+            let valid = true; //validation code to make sure the users input isn't blank
+
+            if(source==""){//ah I see this is for making sure the user hasn't inputted invalid data, nice
+                valid = false};
+            if(amount==0){
+                valid=false
+            } 
+            if(date == ""){
+                valid = false
+            }
+            return valid
+    }
+
+
     const handleSave = () => {
-
-        let valid = true;
-
-        if(source==""){
-            valid = false};
-        if(amount==0){
-            valid=false
-        } 
-        if(date == ""){
-            valid = false
-        }
-        
-        
 
         const entry = {
             id: Date.now(),
@@ -37,11 +86,26 @@ const Income = ({ onAction }) => {
             isRecurring: isRecurring,
             repeatAmount: isRecurring ? repeatAmount : null
             };
+        
 
-        if(valid){
+        if(validCheck(entry)){
+
+
+
             const data = loadData(); //we can get away with creating a new data object here because we know that loadData always returns data of the type defaultData 
             data.income.push(entry);
             saveData(data);
+
+
+            if(isRecurring) {
+                const updatedList = handleRecurring(entry);
+                setIncomes(updatedList);
+                console.log(updatedList)
+            } else {
+                console.log(data.income)
+                setIncomes(data.income);
+            }
+
             alert("Saved " + source + " (£" + amount + ") on " + date);
             if (onAction) onAction();
             setRefresh(prev => prev + 1); 
@@ -59,6 +123,7 @@ const Income = ({ onAction }) => {
 
     };
 
+    const todayStr = new Date().toISOString().split('T')[0];
     return(
         <div className='container'>
         
@@ -99,7 +164,7 @@ const Income = ({ onAction }) => {
         {isRecurring && (
             <select value={repeatAmount} onChange={(e) => setRepeatAmount(e.target.value)}>
                 <option value="weekly">Weekly</option>
-                <option value="biweekly">Bi-Weekly</option>
+                <option value="bi-weekly">Bi-Weekly</option>
                 <option value="monthly">Monthly</option>
             </select>
 	)}
@@ -110,7 +175,8 @@ const Income = ({ onAction }) => {
 
             <h4>Income History</h4>
             <ul style={{ listStyle: 'none', padding: 0 }}>
-                {loadData().income.map((item) => (
+                {loadData().income.filter(item => item.date <=todayStr)
+                .map((item) => (
                     <li key={item.id} style={{ marginBottom: '8px' }}>
                         {item.source}: £{item.amount} — {item.date}
                     </li>

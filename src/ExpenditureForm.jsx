@@ -36,10 +36,11 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
     function handleRecurring(entry){
         const data = loadData();
         let nextDate = new Date(entry.date);
-        const today = new Date("2026-04-01");        
-        const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        const today = new Date("2026-05-01");        
+        const stopDate = new Date("2026-07-01");
         if((nextDate.getMonth() == today.getMonth())){
             while (true) {
+                console.log(entry)
                 if (entry.repeatAmount === "weekly") {
                     nextDate.setDate(nextDate.getDate() + 7);
                 } else if (entry.repeatAmount === "bi-weekly") {
@@ -49,7 +50,10 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                 }
 
                 const dateString = nextDate.toLocaleDateString('en-CA')
-                if (dateString.slice(0,7) !== data.month) break;
+                console.log(dateString.slice(0,7))
+                console.log(data.month)
+                console.log(stopDate.toLocaleDateString('en-CA').slice(0,7))
+                if (dateString.slice(0,7) > stopDate.toLocaleDateString('en-CA').slice(0,7)) break;
                 const newData = {
                     id: Date.now() + Math.random(),
                     name: entry.name,
@@ -61,13 +65,16 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                 }
 
                 data.expenditures.push(newData);
-                if (nextDate.getMonth() != today.getMonth()) break;
+                console.log("Dates:")
+                console.log(nextDate.getMonth())
+                console.log(stopDate.getMonth())
+                if (nextDate.getMonth() > stopDate.getMonth()) break;
             }
         }
         saveData(data);
         return data.expenditures;
     }
-        
+
     function handleSubmit(e) //the function that is called when the form needs to be submitted
     {
         e.preventDefault();//preventDefault here stops the default page activity(reloading the page) before it can erase user data
@@ -91,6 +98,8 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                     const data = loadData();//creates a new data object in line with what is returned by loadData, (either a blank defualtData object, see data.js, or the users previously filled out localStorage, also originally a defaultData object)
                     data.expenditures.push(newExpenditure);//pushes the new expenditure to the users data
                     saveData(data);//saves the edited data to localStorage
+                    
+
                     if(isRecurring) {
                         const updatedList = handleRecurring(newExpenditure);
                         setExpenditures(updatedList);
@@ -152,6 +161,7 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
         if (onAction) onAction();
 
     }
+    const todayStr = new Date().toISOString().split('T')[0];
 
 
     return (
@@ -209,11 +219,11 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
         )}
 
         <button className='container' onSubmit>Save Entry</button>
-
         <h4>Expenditure History</h4>{/*basically a copied over version of income history with some edit and delete button changes*/}
             <ul style={{ listStyle: 'none', padding: 0, maxHeight: '300px', overflowY: 'auto' }}>
-
-                {expenditures.map((item) => (   
+                
+                {expenditures.filter(item => item.date <=todayStr)
+                .map((item) => (   
                     <li key={item.id} style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
 
                         {item.name}: £{item.amount} {item.category}— {item.date} 
