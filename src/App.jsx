@@ -11,6 +11,11 @@ import { calculateExpendableIncome } from './data'
 function App() {
   const [count, setCount] = useState(0)
   const [activeTab, setActiveTab] = useState("income");
+  const [balance, setBalance] = useState(calculateExpendableIncome());
+
+  const refresh = () => {
+    setBalance(calculateExpendableIncome())
+  }
 
   return (
     <div>
@@ -47,7 +52,8 @@ function App() {
       </div>
       <div>
         <h2>
-          Balance: £{calculateExpendableIncome()}
+          Balance: £{balance}
+      
         </h2>
       </div>
   

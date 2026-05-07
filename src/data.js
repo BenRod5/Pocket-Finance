@@ -33,6 +33,7 @@ export function saveData(data) {
 }
 
 
+
 // Task 1: Calculate the expendable income based on: (total income - expenditures).
 export function calculateExpendableIncome() {
   // Calculates both the total income and expenditure received from the user
@@ -40,9 +41,15 @@ export function calculateExpendableIncome() {
   
   // the expendable income.
   const data = loadData()
-  const totalIncome = data.income.reduce((sum, entry) => sum + entry.amount, 0);
-  const totalExpenditure = data.expenditures.reduce((sum, entry) => sum + entry.amount, 0);
-  const expendableIncome = totalIncome - totalExpenditure;
+  const todayStr = new Date().toISOString().split('T')[0];
+  console.log(todayStr)
+  const totalIncome = data.income
+      .filter(entry => entry.date <= todayStr)
+      .reduce((sum, entry) => sum + entry.amount, 0);  
+  const totalExpenditure = data.expenditures
+      .filter(entry => entry.date <= todayStr)
+      .reduce((sum, entry) => sum + entry.amount, 0);  const expendableIncome = totalIncome - totalExpenditure;
+
   return expendableIncome;
 
 
@@ -83,8 +90,10 @@ export function rolloverleftoverToNextMonth(data, newMonth) {
   // Saves and returns the data to the local storage (STORAGE_KEY).
   saveData(data);
   return data;
-
 }
+
+
+
 
 
 

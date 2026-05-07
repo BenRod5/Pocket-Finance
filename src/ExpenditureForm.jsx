@@ -6,36 +6,20 @@ import {loadData, saveData} from './data.js'
 //still need to implement the functionality for adding recurring expenditures, with the handleSubmit, duplicated dates method
 
 
-function ExpenditureForm() { //the function containing all our form logic
+function ExpenditureForm({ onAction }) { //the function containing all our form logic
     const [name, setName] = useState("");//establishing the variables name, amount, date, category in the back end, establishing an initial state and setter functions for each variable
     const [amount, setAmount] = useState(0);
     const [date, setDate] = useState("");
     const [category, setCategory] = useState("necessity"); //default value for category is "necessity"
     const [editingID, setEditingID] = useState("");//if editingID is "" then nothing needs to be edited if it contains an ID then we are editing values rather than adding a new value
-    const [expenditures, setExpenditures] = useState(loadData().expenditures);// we need expenditures represented as state so that when it changes the expenditure list is updated
     const [isRecurring, setIsRecurring] = useState(false);
     const [repeatAmount, setRepeatAmount] = useState("monthly");
+    const [expenditures, setExpenditures] = useState(loadData().expenditures);
 
     //these variables name, amount, etc act as the contents of our input fields when the user presses submit. 
     //they are live values which change with each use input
 
-
-    function handleSubmit(e) //the function that is called when the form needs to be submitted
-    {
-        e.preventDefault();//preventDefault here stops the default page activity(reloading the page) before it can erase user data
-        
-        const newExpenditure = {//this should work instead
-                id: Date.now(),//newExpenditure is an object which takes attributes from the values written by the user in the form
-                name: name,
-                amount: amount,
-                date: date,
-                category: category,
-                isRecurring: isRecurring,
-                repeatAmount: isRecurring ? repeatAmount : null
-            };
-        
-        
-        
+    function validCheck(data){
             let valid = true; //validation code to make sure the users input isn't blank
 
             if(name==""){//ah I see this is for making sure the user hasn't inputted invalid data, nice
@@ -46,24 +30,84 @@ function ExpenditureForm() { //the function containing all our form logic
             if(date == ""){
                 valid = false
             }
+            return valid
+    }
+
+    function handleRecurring(entry){
+        const data = loadData();
+        let nextDate = new Date(entry.date);
+        const today = new Date("2026-05-01");        
+        const stopDate = new Date("2026-07-01");
+        if((nextDate.getMonth() == today.getMonth())){
+            while (true) {
+                console.log(entry)
+                if (entry.repeatAmount === "weekly") {
+                    nextDate.setDate(nextDate.getDate() + 7);
+                } else if (entry.repeatAmount === "bi-weekly") {
+                    nextDate.setDate(nextDate.getDate() + 14);
+                } else if (entry.repeatAmount === "monthly") {
+                    nextDate.setMonth(nextDate.getMonth() + 1);
+                }
+
+                const dateString = nextDate.toLocaleDateString('en-CA')
+                console.log(dateString.slice(0,7))
+                console.log(data.month)
+                console.log(stopDate.toLocaleDateString('en-CA').slice(0,7))
+                if (dateString.slice(0,7) > stopDate.toLocaleDateString('en-CA').slice(0,7)) break;
+                const newData = {
+                    id: Date.now() + Math.random(),
+                    name: entry.name,
+                    amount: entry.amount,
+                    date: dateString,
+                    category: entry.category,
+                    isRecurring: entry.isRecurring,
+                    repeatAmount: entry.isRecurring ? entry.repeatAmount : null
+                }
+
+                data.expenditures.push(newData);
+                console.log("Dates:")
+                console.log(nextDate.getMonth())
+                console.log(stopDate.getMonth())
+                if (nextDate.getMonth() > stopDate.getMonth()) break;
+            }
+        }
+        saveData(data);
+        return data.expenditures;
+    }
+
+    function handleSubmit(e) //the function that is called when the form needs to be submitted
+    {
+        e.preventDefault();//preventDefault here stops the default page activity(reloading the page) before it can erase user data
+        
+        const newExpenditure = {//this should work instead
+                id: Date.now(),//newExpenditure is an object which takes attributes from the values written by the user in the form
+                name: name,
+                amount: Number(amount),
+                date: date,
+                category: category,
+                isRecurring: isRecurring,
+                repeatAmount: isRecurring ? repeatAmount : null
+            };
+        
+            const valid = validCheck(newExpenditure);
             
             if(valid){
                 
-               
                 if(editingID == "")
                 {//add a value as normal
                     const data = loadData();//creates a new data object in line with what is returned by loadData, (either a blank defualtData object, see data.js, or the users previously filled out localStorage, also originally a defaultData object)
-                    // if(isRecurring)
-                    // {
-                    //     // if(repeatAmount=="monthly")
-                    //     // {//assuming this will be recurring for 
-
-                    //     // }
-                    // }
                     data.expenditures.push(newExpenditure);//pushes the new expenditure to the users data
                     saveData(data);//saves the edited data to localStorage
-                    setExpenditures(data.expenditures);//updating the expenditures state once saveData is called so the display adjusts
+                    
+
+                    if(isRecurring) {
+                        const updatedList = handleRecurring(newExpenditure);
+                        setExpenditures(updatedList);
+                    } else {
+                        setExpenditures(data.expenditures);
+                    }
                     alert("Saved " + name + " (£" + amount + ") on " + date); //alerts the user as to the successful saving of their data.
+                    if (onAction) onAction();
                 }
                 else
                 {
@@ -73,7 +117,8 @@ function ExpenditureForm() { //the function containing all our form logic
                     data.expenditures = filteredArray;
                     data.expenditures.push(newExpenditure);//push a new object with the users desired values as decided above
                     saveData(data);//save the values
-                    setExpenditures(data.expenditures);//updating the expenditures state once saveData is called so the display adjusts
+                    setExpenditures(data.expenditures);                    
+                    if (onAction) onAction();
 
                 }
                
@@ -100,6 +145,7 @@ function ExpenditureForm() { //the function containing all our form logic
         data.expenditures = filteredValues; //put the filtered expenditures back in the whole data object
         saveData(data);//return all values - that one filtered out ID
         setExpenditures(data.expenditures);//updating the expenditures state once saveData is called so the display adjusts
+        if (onAction) onAction();
 
     }
     
@@ -112,7 +158,10 @@ function ExpenditureForm() { //the function containing all our form logic
         setAmount(ourEntry.amount);
         setCategory(ourEntry.category);
         setDate(ourEntry.date); 
+        if (onAction) onAction();
+
     }
+    const todayStr = new Date().toISOString().split('T')[0];
 
 
     return (
@@ -164,17 +213,17 @@ function ExpenditureForm() { //the function containing all our form logic
         {isRecurring && (
         <select value = {repeatAmount} onChange = { (e) => setRepeatAmount (e.target.value)}>
             <option value = "monthly"> Monthly </option>
-            <option value = "bi-Weekly"> Bi-Weekly </option>
+            <option value = "bi-weekly"> Bi-Weekly </option>
             <option value = "weekly"> Weekly </option>
         </select>
         )}
 
         <button className='container' onSubmit>Save Entry</button>
-
         <h4>Expenditure History</h4>{/*basically a copied over version of income history with some edit and delete button changes*/}
             <ul style={{ listStyle: 'none', padding: 0, maxHeight: '300px', overflowY: 'auto' }}>
-
-                {expenditures.map((item) => (   
+                
+                {expenditures.filter(item => item.date <=todayStr)
+                .map((item) => (   
                     <li key={item.id} style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
 
                         {item.name}: £{item.amount} {item.category}— {item.date} 
