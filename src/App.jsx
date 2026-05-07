@@ -46,9 +46,9 @@ function App() {
       </div>
 
       <div>
-        {activeTab === "income" ? <Income /> :""}
-        {activeTab === "expenses"?<ExpenditureForm/>: ""}
-        {activeTab === "ask" ? <AskQuestionForm />: ""}
+        {activeTab === "income" ? <Income onAction={refresh}/> :""}
+        {activeTab === "expenses"?<ExpenditureForm onAction={refresh}/>: ""}
+        {activeTab === "ask" ? <AskQuestionForm onAction={refresh}/>: ""}
       </div>
       <div>
         <h2>

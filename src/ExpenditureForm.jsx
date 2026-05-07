@@ -38,9 +38,9 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
         let nextDate = new Date(entry.date);
         const today = new Date("2026-05-01");        
         const stopDate = new Date("2026-07-01");
+        const seriesID = entry.id;
         if((nextDate.getMonth() == today.getMonth())){
             while (true) {
-                console.log(entry)
                 if (entry.repeatAmount === "weekly") {
                     nextDate.setDate(nextDate.getDate() + 7);
                 } else if (entry.repeatAmount === "bi-weekly") {
@@ -50,12 +50,11 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                 }
 
                 const dateString = nextDate.toLocaleDateString('en-CA')
-                console.log(dateString.slice(0,7))
-                console.log(data.month)
-                console.log(stopDate.toLocaleDateString('en-CA').slice(0,7))
+
                 if (dateString.slice(0,7) > stopDate.toLocaleDateString('en-CA').slice(0,7)) break;
                 const newData = {
                     id: Date.now() + Math.random(),
+                    seriesID: seriesID,
                     name: entry.name,
                     amount: entry.amount,
                     date: dateString,
@@ -65,9 +64,7 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                 }
 
                 data.expenditures.push(newData);
-                console.log("Dates:")
-                console.log(nextDate.getMonth())
-                console.log(stopDate.getMonth())
+
                 if (nextDate.getMonth() > stopDate.getMonth()) break;
             }
         }
@@ -89,9 +86,9 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                 repeatAmount: isRecurring ? repeatAmount : null
             };
         
-            const valid = validCheck(newExpenditure);
             
-            if(valid){
+            
+            if(validCheck(newExpenditure)){
                 
                 if(editingID == "")
                 {//add a value as normal
@@ -141,7 +138,7 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
     function handleDelete(itemID)
     {
         const data = loadData();//loads user data
-        const filteredValues = data.expenditures.filter((item) => item.id!=itemID);//filter out all values with ID == itemID
+        const filteredValues = data.expenditures.filter((item) => item.id!=itemID && (item.isRecurring && item.seriesID != itemID ));//filter out all values with ID == itemID
         data.expenditures = filteredValues; //put the filtered expenditures back in the whole data object
         saveData(data);//return all values - that one filtered out ID
         setExpenditures(data.expenditures);//updating the expenditures state once saveData is called so the display adjusts

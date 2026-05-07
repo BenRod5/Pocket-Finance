@@ -10,6 +10,8 @@ const Income = ({ onAction }) => {
     const [repeatAmount, setRepeatAmount] = useState("monthly");
     const [refresh, setRefresh] = useState(0);
     const [incomes, setIncomes] = useState(loadData().income);
+    const [editingID, setEditingID] = useState("");//if editingID is "" then nothing needs to be edited if it contains an ID then we are editing values rather than adding a new value
+    
 
 
 
@@ -19,6 +21,7 @@ const Income = ({ onAction }) => {
         let nextDate = new Date(entry.date);
         const today = new Date("2026-05-01");        
         const stopDate = new Date("2026-07-01");
+        const seriesID = entry.id;
         if((nextDate.getMonth() == today.getMonth())){
             while (true) {
                 console.log(entry)
@@ -37,6 +40,7 @@ const Income = ({ onAction }) => {
                 if (dateString.slice(0,7) > stopDate.toLocaleDateString('en-CA').slice(0,7)) break;
                 const newData = {
                     id: Date.now() + Math.random(),
+                    seriesID: seriesID,
                     source: entry.source,
                     amount: entry.amount,
                     date: dateString,
@@ -123,6 +127,33 @@ const Income = ({ onAction }) => {
 
     };
 
+    function handleDelete(itemID){
+
+        const data = loadData();//loads user data
+        const filteredValues = data.income.filter((item) => item.id!=itemID && (item.isRecurring && item.seriesID != itemID ));//filter out all values with ID == itemID
+        data.income = filteredValues; //put the filtered expenditures back in the whole data object
+        saveData(data);//return all values - that one filtered out ID
+        setIncomes(data.income);//updating the expenditures state once saveData is called so the display adjusts
+        console.log(data.income)
+        if (onAction) onAction();
+    }
+
+    function handleEdit(itemID){
+
+            const data = loadData();//loads user data from localStorage
+            const ourEntry = data.income.find((item) => item.id ==itemID);//search the expenditures array for the ID equal to itemID
+            setEditingID(itemID);//fills in the form with values from the selected expenditure
+            setName(ourEntry.source);
+            setAmount(ourEntry.amount);
+            setCategory(ourEntry.category);
+            setSeriesID(ourEntry.seriesID);
+            setDate(ourEntry.date); 
+            if (onAction) onAction();
+            
+}
+
+
+
     const todayStr = new Date().toISOString().split('T')[0];
     return(
         <div className='container'>
@@ -177,8 +208,20 @@ const Income = ({ onAction }) => {
             <ul style={{ listStyle: 'none', padding: 0 }}>
                 {loadData().income.filter(item => item.date <=todayStr)
                 .map((item) => (
-                    <li key={item.id} style={{ marginBottom: '8px' }}>
-                        {item.source}: £{item.amount} — {item.date}
+                    <li key={item.id} style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+
+                        {item.source}: £{item.amount} {item.category}— {item.date} 
+                        <button 
+                        type="button" 
+                        onClick={() => handleEdit(item.id)}
+                        style={{ backgroundColor: 'black', color: 'white', border: 'none', padding: '2px 8px', cursor: 'pointer', borderRadius: '4px' }}
+                        >Edit</button>                        
+                        
+                        <button 
+                        type="button" 
+                        onClick={() => handleDelete(item.id)}
+                        style={{ backgroundColor: 'red', color: 'white', border: 'none', padding: '2px 8px', cursor: 'pointer', borderRadius: '4px' }}
+                        >Delete</button> 
                     </li>
                 ))}
             </ul>
