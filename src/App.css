@@ -17,6 +17,26 @@
   }
 }
 
+
+
+.tabs{
+  display: block;
+  justify-content: (center);
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+/*Tab Button Design*/
+.tabs button {
+	padding: 10px 20px;
+	cursor: pointer;
+	background: #333;
+	color: white;
+	border: 1px solid #555;
+	border-radius: 5px;
+  margin-right: 10px;
+}
+
 .hero {
   position: relative;
 

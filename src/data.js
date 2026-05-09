@@ -1,24 +1,23 @@
-// Shared data structure for Pocket Finance
-// All features read from and write to localStorage using these keys do not access localStorage directly, in order to enforce as much modularity as we can we want to only use save and load data, keep things simple
-
+// This is our Shared data structure for Pocket Finance
+//Use the below data shape and functions to interact with storage, keeps things modular.
 //fun note about localStorage, it is unique to each user and stored on their browser, so even if they all have the same pocketFinanceData storage key, their data will never overlap which saves us a lot of complexity and the headache of storing their data on a server
 
-export const STORAGE_KEY = "pocketFinanceData"; //A key used to store all user data in localStorage, each user will have one defaultData object
+export const STORAGE_KEY = "pocketFinanceData"; //A key used to store all user data in localStorage, each user will have one defaultData object, again the key isn't unique which is cool
 
 
-export const defaultData = { //exported default data structure for any other file to access
+export const defaultData = { //defaultData shape for other files to use as a blueprint
   income: [
-    // { id, source, amount, dayOfMonth } the shape of each income entry
-    // e.g. { id: 1, source: "Student Finance", amount: 1200, dayOfMonth: 1 }
+    // { id, source, amount, dayOfMonth } the values and shape of each entry to income
+    // for example { id: 1, source: "Student Finance", amount: 1200, dayOfMonth: 1 }
   ], 
   expenditures: [
-    // { id, name, amount, date, category } //the shape of each input to the expenditures array
-    // category must be either "necessity" or "luxury"
+    // { id, name, amount, date, category } //our shape for all inputs into the expenditures array
+    // category must be either "necessity" or "luxury", binary between one or the other
     // e.g. { id: 1, name: "Rent", amount: 500, date: "2026-04-01", category: "necessity" }
   ],
   savingsGoal: 0,       // amount user wants to save this month
-  spendingMoney: 0,     // expendable income minus savings goal
-  month: "2026-04"      // current active month, in "YYYY-MM" format, storing it this way makes it easy to compare and sort dates
+  spendingMoney: 0,     // expendable income - savings goal
+  month: "2026-04"      // current month, in "YYYY-MM" format, sorry for the americanism it just makes more sense
 };
 
 // Call this to load data from localStorage
@@ -34,14 +33,23 @@ export function saveData(data) {
 }
 
 
+
 // Task 1: Calculate the expendable income based on: (total income - expenditures).
-export function calculateExpendableIncome(data) {
+export function calculateExpendableIncome() {
   // Calculates both the total income and expenditure received from the user
   // and then calculates the difference between the two to find
+  
   // the expendable income.
-  const totalIncome = data.income.reduce((sum, entry) => sum + entry.amount, 0);
-  const totalExpenditure = data.expenditures.reduce((sum, entry) => sum + entry.amount, 0);
-  const expendableIncome = totalIncome - totalExpenditure;
+  const data = loadData()
+  const todayStr = new Date().toISOString().split('T')[0];
+  console.log(todayStr)
+  const totalIncome = data.income
+      .filter(entry => entry.date <= todayStr)
+      .reduce((sum, entry) => sum + entry.amount, 0);  
+  const totalExpenditure = data.expenditures
+      .filter(entry => entry.date <= todayStr)
+      .reduce((sum, entry) => sum + entry.amount, 0);  const expendableIncome = totalIncome - totalExpenditure;
+
   return expendableIncome;
 
 
@@ -82,8 +90,10 @@ export function rolloverleftoverToNextMonth(data, newMonth) {
   // Saves and returns the data to the local storage (STORAGE_KEY).
   saveData(data);
   return data;
-
 }
+
+
+
 
 
 
