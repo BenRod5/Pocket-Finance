@@ -17,7 +17,7 @@ export const defaultData = { //defaultData shape for other files to use as a blu
   ],
   savingsGoal: 0,       // amount user wants to save this month
   spendingMoney: 0,     // expendable income - savings goal
-  month: "2026-04"      // current month, in "YYYY-MM" format, sorry for the americanism it just makes more sense
+  month: Date.now()      // current month, in "YYYY-MM" format, sorry for the americanism it just makes more sense
 };
 
 // Call this to load data from localStorage

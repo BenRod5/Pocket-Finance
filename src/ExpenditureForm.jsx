@@ -37,7 +37,7 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
         const data = loadData();
         let nextDate = new Date(entry.date);
         const stopDate = new Date(entry.date);
-        stopDate.setMonth(stopDate.getMonth() + 3);
+        stopDate.setMonth(stopDate.getMonth() + 12);
 
         console.log("START DATE:", nextDate.toLocaleDateString('en-CA'));
         console.log("STOP DATE:", stopDate.toLocaleDateString('en-CA'));
@@ -66,6 +66,8 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                     repeatAmount: entry.isRecurring ? entry.repeatAmount : null
                 }
                 data.expenditures.push(newData);
+
+                
 
                 if (nextDate > stopDate ) break;
             

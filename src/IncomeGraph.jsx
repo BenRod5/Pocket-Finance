@@ -13,16 +13,17 @@ const IncomeGraph = () => {
 
   const buildChartData = () => {
     const dataObject = getData();
+    const currentYear = new Date().getFullYear()
     const incomeList = dataObject.income || [];
     const expenditureList = dataObject.expenditures || [];
 
     const data = MONTHS.map((month, monthNum) => {
       const monthIncome = incomeList
-        .filter(item => item.date && new Date(item.date).getMonth() === monthNum)
+        .filter(item => item.date && new Date(item.date).getFullYear() === new Date().getFullYear() && new Date(item.date).getMonth() === monthNum)
         .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
 
       const monthExpenses = expenditureList
-        .filter(item => item.date && new Date(item.date).getMonth() === monthNum)
+        .filter(item => item.date && new Date(item.date).getFullYear() === new Date().getFullYear() && new Date(item.date).getMonth() === monthNum)
         .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
 
       return { month, income: monthIncome, expenses: monthExpenses };
