@@ -1,37 +1,43 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const IncomeGraph = () => {
-  // 1. Load data using your team's EXACT storage key
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+const getData = () => {
   const stored = localStorage.getItem("pocketFinanceData");
-  const dataObject = stored ? JSON.parse(stored) : { income: [], expenditures: [] };
-  
-  const incomeList = dataObject.income || [];
-  const expenditureList = dataObject.expenditures || []; 
+  return stored ? JSON.parse(stored) : { income: [], expenditures: [] };
+};
 
-  // 2. Helper to sum up numbers for each month
-  const getTotalsForMonth = (monthNum) => {
-    const monthIncome = incomeList
-      .filter(item => item.date && new Date(item.date).getMonth() === monthNum)
-      .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+const IncomeGraph = () => {
+  const [chartData, setChartData] = useState([]);
 
-    const monthExpenses = expenditureList
-      .filter(item => item.date && new Date(item.date).getMonth() === monthNum)
-      .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  const buildChartData = () => {
+    const dataObject = getData();
+    const incomeList = dataObject.income || [];
+    const expenditureList = dataObject.expenditures || [];
 
-    return { 
-      income: monthIncome, 
-      expenses: monthExpenses 
-    };
+    const data = MONTHS.map((month, monthNum) => {
+      const monthIncome = incomeList
+        .filter(item => item.date && new Date(item.date).getMonth() === monthNum)
+        .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+
+      const monthExpenses = expenditureList
+        .filter(item => item.date && new Date(item.date).getMonth() === monthNum)
+        .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+
+      return { month, income: monthIncome, expenses: monthExpenses };
+    });
+
+    setChartData(data);
   };
 
-  // 3. Build the data for the bars
-  const chartData = [
-    { month: 'Jan', ...getTotalsForMonth(0) },
-    { month: 'Feb', ...getTotalsForMonth(1) },
-    { month: 'Mar', ...getTotalsForMonth(2) },
-    { month: 'Apr', ...getTotalsForMonth(3) },
-  ];
+  useEffect(() => {
+    buildChartData();
+    const handleStorageChange = () => buildChartData();
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   return (
     <div style={{ width: '100%', height: 350, backgroundColor: '#1e1e1e', padding: '20px', borderRadius: '10px', marginTop: '20px', border: '1px solid #333' }}>
