@@ -11,6 +11,7 @@ const Income = ({ onAction }) => {
     const [refresh, setRefresh] = useState(0);
     const [incomes, setIncomes] = useState(loadData().income);
     const [editingID, setEditingID] = useState("");//if editingID is "" then nothing needs to be edited if it contains an ID then we are editing values rather than adding a new value
+    //const [balance, setBalance] = useState(calculateExpendableIncome());
     
 
 
@@ -99,9 +100,6 @@ const Income = ({ onAction }) => {
             if(editingID) {
                 // Edit mode. - Swap out old entry. Filter out recurring payments
                 // when needed.
-                // data.income = data.income.map((item) =>
-                // item.id === editingID ? entry : item
-                // );
                 data.income = data.income.filter((item) => item.id !== editingID &&
                 item.seriesID !== editingID);
 
@@ -164,19 +162,16 @@ const Income = ({ onAction }) => {
         if (onAction) onAction();
     }
 
+    // Handles edited data.
     function handleEdit(itemID){
-
             const data = loadData();//loads user data from localStorage
             const ourEntry = data.income.find((item) => item.id ==itemID);//search the expenditures array for the ID equal to itemID
             setEditingID(itemID);//fills in the form with values from the selected expenditure
-            // Tempoarily commented out to allow 'Edit' to function.
-            // Added 'setSource'.
             setSource(ourEntry.source);
             setAmount(ourEntry.amount);
-            //setName(ourEntry.source);
-            //setCategory(ourEntry.category);
             //setSeriesID(ourEntry.seriesID);
             setDate(ourEntry.date);
+
             // Added IsRecurring and RepeatAmount.
             setIsRecurring(ourEntry.isRecurring);
             setRepeatAmount(ourEntry.repeatAmount);
@@ -187,6 +182,9 @@ const Income = ({ onAction }) => {
 
 
     const todayStr = new Date().toISOString().split('T')[0];
+    // I moved the income here to declare them as variables.
+    const filteredIncomes = incomes.filter(item => item.date <= todayStr);
+    const totalIncome = filteredIncomes.reduce((sum, item) => sum + item.amount, 0);
     return(
         <div className='container'>
         
@@ -238,11 +236,13 @@ const Income = ({ onAction }) => {
 
             <h4>Income History</h4>
             <ul style={{ listStyle: 'none', padding: 0 }}>
-                {loadData().income.filter(item => item.date <=todayStr)
-                .map((item) => (
+                {filteredIncomes.map((item) => {
+                    // Ternary operation: Won't calculate % if no income is present.
+                    const percentage = totalIncome > 0 ? ((item.amount / totalIncome) * 100).toFixed(1):0;
+                return (
                     <li key={item.id} style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-
-                        {item.source}: £{item.amount} {item.category}— {item.date}
+                        {/*Display Source, Amount and Percentage.*/}
+                        {item.source}: £{item.amount} {item.category}— {item.date} - {percentage}%
 
                         {/*Edit button.*/}
                         <button 
@@ -258,7 +258,9 @@ const Income = ({ onAction }) => {
                         style={{ backgroundColor: 'red', color: 'white', border: 'none', padding: '2px 8px', cursor: 'pointer', borderRadius: '4px' }}
                         >Delete</button> 
                     </li>
-                ))}
+                );
+            })}
+            
             </ul>
 
 
