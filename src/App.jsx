@@ -1,4 +1,5 @@
 import { act, useState } from 'react'
+import IncomeGraph from './IncomeGraph';
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
@@ -55,6 +56,7 @@ function App() {
           Balance: £{balance}
       
         </h2>
+         <IncomeGraph />
       </div>
   
     </div>
