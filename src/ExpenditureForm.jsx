@@ -36,10 +36,13 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
     function handleRecurring(entry){
         const data = loadData();
         let nextDate = new Date(entry.date);
-        const today = new Date("2026-05-09");        
-        const stopDate = new Date("2026-07-01");
+        const stopDate = new Date(entry.date);
+        stopDate.setMonth(stopDate.getMonth() + 3);
+
+        console.log("START DATE:", nextDate.toLocaleDateString('en-CA'));
+        console.log("STOP DATE:", stopDate.toLocaleDateString('en-CA'));
+
         const seriesID = entry.id;
-        if((nextDate.getMonth() == today.getMonth())){
             while (true) {
                 if (entry.repeatAmount === "weekly") {
                     nextDate.setDate(nextDate.getDate() + 7);
@@ -48,10 +51,10 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                 } else if (entry.repeatAmount === "monthly") {
                     nextDate.setMonth(nextDate.getMonth() + 1);
                 }
-
+            
                 const dateString = nextDate.toLocaleDateString('en-CA')
 
-                if (dateString.slice(0,7) > stopDate.toLocaleDateString('en-CA').slice(0,7)) break;
+
                 const newData = {
                     id: Date.now() + Math.random(),
                     seriesID: seriesID,
@@ -62,11 +65,10 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                     isRecurring: entry.isRecurring,
                     repeatAmount: entry.isRecurring ? entry.repeatAmount : null
                 }
-                console.log(newData);
                 data.expenditures.push(newData);
 
-                if (nextDate.getMonth() > stopDate.getMonth()) break;
-            }
+                if (nextDate > stopDate ) break;
+            
         }
         saveData(data);
         return data.expenditures;
@@ -98,14 +100,13 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
 
 
                     if(newExpenditure.isRecurring) {
-
-                        setExpenditures(data.expenditures);
+                        saveData(data)
                         const updatedList = handleRecurring(newExpenditure);
                         setExpenditures(updatedList);
                     } else {
+                        saveData(data)
                         setExpenditures(data.expenditures);
                     }
-                    saveData(data);
                     alert("Saved " + name + " (£" + amount + ") on " + date); //alerts the user as to the successful saving of their data.
                     if (onAction) onAction();
                 }
@@ -114,9 +115,7 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                     const data = loadData();
                     
                     data.expenditures = data.expenditures.map((item) => {
-                        if ( item.seriesID == editingID){
-                            console.log(item)
-                            console.log("RETURNING");
+                        if ( item.seriesID === editingID){
                             return {
                                 ...item,
                                 name,
@@ -127,7 +126,6 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                                 repeatAmount: isRecurring ? repeatAmount : null
                             };
                         }
-                        console.log(item);
                         return item;
                     });
                     saveData(data);//save the values
@@ -144,7 +142,7 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
        
 
         setName("");//I assume this sets the state values back to default again
-        setAmount("");
+        setAmount(0);
         setDate("");
         setCategory("necessity");
         setEditingID("");
@@ -155,7 +153,7 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
     function handleDelete(itemID)
     {
         const data = loadData();//loads user data
-        const filteredValues = data.expenditures.filter((item) => item.id!=itemID && (item.isRecurring && item.seriesID != itemID ));//filter out all values with ID == itemID
+        const filteredValues = data.expenditures.filter((item) => item.id!==itemID && item.seriesID !== itemID );//filter out all values with ID == itemID
         data.expenditures = filteredValues; //put the filtered expenditures back in the whole data object
         saveData(data);//return all values - that one filtered out ID
         setExpenditures(data.expenditures);//updating the expenditures state once saveData is called so the display adjusts
@@ -167,7 +165,7 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
     {//is called when the edit button is clicked in the expenditure list
         const data = loadData();
         const ourEntry = data.expenditures.find(
-            (item) => item.id == itemID
+            (item) => item.id === itemID
         );
 
         setEditingID(itemID);
@@ -236,7 +234,7 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
         </select>
         )}
 
-        <button className='container' onSubmit>Save Entry</button>
+        <button className='container' type="submit">Save Entry</button>
         <h4>Expenditure History</h4>{/*basically a copied over version of income history with some edit and delete button changes*/}
             <ul style={{ listStyle: 'none', padding: 0, maxHeight: '300px', overflowY: 'auto' }}>
                 

@@ -11,7 +11,6 @@ const Income = ({ onAction }) => {
     const [refresh, setRefresh] = useState(0);
     const [incomes, setIncomes] = useState(loadData().income);
     const [editingID, setEditingID] = useState("");//if editingID is "" then nothing needs to be edited if it contains an ID then we are editing values rather than adding a new value
-    
 
 
 
@@ -19,42 +18,38 @@ const Income = ({ onAction }) => {
     function handleRecurring(entry){
         const data = loadData();
         let nextDate = new Date(entry.date);
-        const today = new Date("2026-05-01");        
-        const stopDate = new Date("2026-07-01");
+        const stopDate = new Date(entry.date);
+        stopDate.setMonth(stopDate.getMonth() + 3);
+
+        console.log("START DATE:", nextDate.toLocaleDateString('en-CA'));
+        console.log("STOP DATE:", stopDate.toLocaleDateString('en-CA'));
+        
         const seriesID = entry.id;
-        if((nextDate.getMonth() == today.getMonth())){
-            while (true) {
-                console.log(entry)
-                if (entry.repeatAmount === "weekly") {
-                    nextDate.setDate(nextDate.getDate() + 7);
-                } else if (entry.repeatAmount === "bi-weekly") {
-                    nextDate.setDate(nextDate.getDate() + 14);
-                } else if (entry.repeatAmount === "monthly") {
-                    nextDate.setMonth(nextDate.getMonth() + 1);
-                }
-
-                const dateString = nextDate.toLocaleDateString('en-CA')
-                console.log(dateString.slice(0,7))
-                console.log(data.month)
-                console.log(stopDate.toLocaleDateString('en-CA').slice(0,7))
-                if (dateString.slice(0,7) > stopDate.toLocaleDateString('en-CA').slice(0,7)) break;
-                const newData = {
-                    id: Date.now() + Math.random(),
-                    seriesID: seriesID,
-                    source: entry.source,
-                    amount: entry.amount,
-                    date: dateString,
-                    category: entry.category,
-                    isRecurring: entry.isRecurring,
-                    repeatAmount: entry.isRecurring ? entry.repeatAmount : null
-                }
-
-                data.income.push(newData);
-                console.log("Dates:")
-                console.log(nextDate.getMonth())
-                console.log(stopDate.getMonth())
-                if (nextDate.getMonth() > stopDate.getMonth()) break;
+        while (true) {
+            console.log(entry)
+            if (entry.repeatAmount === "weekly") {
+                nextDate.setDate(nextDate.getDate() + 7);
+            } else if (entry.repeatAmount === "bi-weekly") {
+                nextDate.setDate(nextDate.getDate() + 14);
+            } else if (entry.repeatAmount === "monthly") {
+                nextDate.setMonth(nextDate.getMonth() + 1);
             }
+
+            const dateString = nextDate.toLocaleDateString('en-CA')
+
+
+            const newData = {
+                id: Date.now() + Math.random(),
+                seriesID: seriesID,
+                source: entry.source,
+                amount: entry.amount,
+                date: dateString,
+                isRecurring: entry.isRecurring,
+                repeatAmount: entry.isRecurring ? entry.repeatAmount : null
+            }
+            data.income.push(newData);
+
+            if (nextDate > stopDate) break;
         }
         saveData(data);
         return data.income;
@@ -82,8 +77,11 @@ const Income = ({ onAction }) => {
 
     const handleSave = () => {
 
+        const now = Date.now()
+
         const entry = {
-            id: Date.now(),
+            id: now,
+            seriesID: now,
             source: source,
             amount: Number(amount),
             date: date,
@@ -95,24 +93,44 @@ const Income = ({ onAction }) => {
         if(validCheck(entry)){
 
 
+            if(editingID == ""){
+                const data = loadData();
+                data.income.push(entry);
 
-            const data = loadData(); //we can get away with creating a new data object here because we know that loadData always returns data of the type defaultData 
-            data.income.push(entry);
-            saveData(data);
 
+                if(isRecurring) {
+                    saveData(data)
+                    const updatedList = handleRecurring(entry);
+                    setIncomes(updatedList);
 
-            if(isRecurring) {
-                const updatedList = handleRecurring(entry);
-                setIncomes(updatedList);
-                console.log(updatedList)
-            } else {
-                console.log(data.income)
-                setIncomes(data.income);
+                } else {
+                    saveData(data)
+                    setIncomes(data.income);
+                }
+                alert("Saved " + source + " (£" + amount + ") on " + date);
+                if (onAction) onAction();
             }
+            else{
 
-            alert("Saved " + source + " (£" + amount + ") on " + date);
-            if (onAction) onAction();
-            setRefresh(prev => prev + 1); 
+                const data = loadData();
+
+                data.income = data.income.map((item) => {
+                    if (item.seriesID === editingID){
+                        return{
+                            ...item,
+                            source,
+                            amount: Number(amount),
+                            
+                            isRecurring,
+                            repeatAmount: isRecurring ? repeatAmount : null
+                        };
+                    }
+                    return item;
+                });
+                saveData(data)
+                setIncomes(data.income);
+                if (onAction) onAction();
+            }
         }
         else{
             alert("Invalid Input");
@@ -124,30 +142,33 @@ const Income = ({ onAction }) => {
         setSource("");
         setAmount(0);
         setDate("");
+        setEditingID("");
+        setIsRecurring(false);
+        setRepeatAmount("monthly");
 
     };
 
     function handleDelete(itemID){
 
         const data = loadData();//loads user data
-        const filteredValues = data.income.filter((item) => item.id!=itemID && (item.isRecurring && item.seriesID != itemID ));//filter out all values with ID == itemID
+        const filteredValues = data.income.filter((item) => item.id!=itemID &&  item.seriesID != itemID );//filter out all values with ID == itemID
         data.income = filteredValues; //put the filtered expenditures back in the whole data object
         saveData(data);//return all values - that one filtered out ID
         setIncomes(data.income);//updating the expenditures state once saveData is called so the display adjusts
-        console.log(data.income)
         if (onAction) onAction();
     }
 
     function handleEdit(itemID){
 
             const data = loadData();//loads user data from localStorage
-            const ourEntry = data.income.find((item) => item.id ==itemID);//search the expenditures array for the ID equal to itemID
+            const ourEntry = data.income.find(
+                (item) => item.id ===itemID);//search the expenditures array for the ID equal to itemID
+            
+            
             setEditingID(itemID);//fills in the form with values from the selected expenditure
-            setName(ourEntry.source);
-            setAmount(ourEntry.amount);
-            setCategory(ourEntry.category);
-            setSeriesID(ourEntry.seriesID);
-            setDate(ourEntry.date); 
+            setSource(ourEntry.source || "");
+            setAmount(ourEntry.amount || 0);
+            setDate(ourEntry.date || ""); 
             if (onAction) onAction();
             
 }
