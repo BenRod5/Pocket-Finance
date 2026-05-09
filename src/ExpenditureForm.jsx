@@ -94,7 +94,7 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                 if(editingID == "")
                 {//add a value as normal
                     const data = loadData();//creates a new data object in line with what is returned by loadData, (either a blank defualtData object, see data.js, or the users previously filled out localStorage, also originally a defaultData object)
-                    data.expenditures.push(newExpenditure)
+                    data.expenditures.push(newExpenditure);
 
 
                     if(newExpenditure.isRecurring) {
@@ -114,14 +114,14 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                     const data = loadData();
                     
                     data.expenditures = data.expenditures.map((item) => {
-                        if ( item.id == editingID){
+                        if ( item.seriesID == editingID){
                             console.log(item)
                             console.log("RETURNING");
                             return {
                                 ...item,
                                 name,
                                 amount: Number(amount),
-                                date,
+                                
                                 category,
                                 isRecurring,
                                 repeatAmount: isRecurring ? repeatAmount : null
