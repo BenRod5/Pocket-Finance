@@ -17,7 +17,7 @@ function App() {
 
   const refresh = () => {
     setBalance(calculateExpendableIncome());
-    setRefreshKey(prev => prev + 1); // 👈 forces graph to rebuild
+    setRefreshKey(prev => prev + 1); 
   }
 
   return (
@@ -55,7 +55,7 @@ function App() {
 
       <div>
         <h2>Balance: £{balance}</h2>
-        <IncomeGraph key={refreshKey} /> {/* 👈 rebuilds when refreshKey changes */}
+        <IncomeGraph key={refreshKey} /> 
       </div>
     </div>
   )
