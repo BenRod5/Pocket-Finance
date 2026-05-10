@@ -1,32 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 const getData = () => {
   const stored = localStorage.getItem("pocketFinanceData");
-  return stored ? JSON.parse(stored) : { income: [], expenditures: [] };
+  return stored ? JSON.parse(stored) : { income: [], expenditures: [], savings: [] };
 };
 
 const IncomeGraph = () => {
   const [chartData, setChartData] = useState([]);
+  const [savingsGoalLine, setSavingsGoalLine] = useState(0);
 
   const buildChartData = () => {
     const dataObject = getData();
-    const currentYear = new Date().getFullYear()
     const incomeList = dataObject.income || [];
     const expenditureList = dataObject.expenditures || [];
+    const savingsList = dataObject.savings || [];
+    const totalGoal = savingsList.reduce((sum, goal) => sum + (goal.target || 0), 0);
+    setSavingsGoalLine(totalGoal);
 
     const data = MONTHS.map((month, monthNum) => {
+      const currentYear = new Date().getFullYear();
+
       const monthIncome = incomeList
-        .filter(item => item.date && new Date(item.date).getFullYear() === new Date().getFullYear() && new Date(item.date).getMonth() === monthNum)
+        .filter(item => item.date && new Date(item.date).getFullYear() === currentYear && new Date(item.date).getMonth() === monthNum)
         .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
 
       const monthExpenses = expenditureList
-        .filter(item => item.date && new Date(item.date).getFullYear() === new Date().getFullYear() && new Date(item.date).getMonth() === monthNum)
+        .filter(item => item.date && new Date(item.date).getFullYear() === currentYear && new Date(item.date).getMonth() === monthNum)
         .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+      const monthSavings = savingsList.reduce((total, goal) => {
+        const goalMonthTotal = (goal.deposits || [])
+          .filter(d => d.date && new Date(d.date).getFullYear() === currentYear && new Date(d.date).getMonth() === monthNum)
+          .reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);
+        return total + goalMonthTotal;
+      }, 0);
 
-      return { month, income: monthIncome, expenses: monthExpenses };
+      return { month, income: monthIncome, expenses: monthExpenses, savings: monthSavings };
     });
 
     setChartData(data);
@@ -36,7 +47,6 @@ const IncomeGraph = () => {
     buildChartData();
     const handleStorageChange = () => buildChartData();
     window.addEventListener('storage', handleStorageChange);
-
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
@@ -52,6 +62,15 @@ const IncomeGraph = () => {
           <Legend />
           <Bar dataKey="income" fill="#4caf50" name="Income (£)" />
           <Bar dataKey="expenses" fill="#f44336" name="Expenses (£)" />
+          <Bar dataKey="savings" fill="#f4c430" name="Savings (£)" />
+          {savingsGoalLine > 0 && (
+            <ReferenceLine
+              y={savingsGoalLine}
+              stroke="#f4c430"
+              strokeDasharray="6 3"
+              label={{ value: `Goal: £${savingsGoalLine}`, fill: '#f4c430', fontSize: 12 }}
+            />
+          )}
         </BarChart>
       </ResponsiveContainer>
     </div>

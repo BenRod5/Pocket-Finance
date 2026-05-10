@@ -7,6 +7,7 @@ import './App.css'
 import ExpenditureForm from './ExpenditureForm'
 import Income from './Income'
 import AskQuestionForm from './AskQuestionForm.jsx'
+import Savings from './Savings.jsx'
 import { calculateExpendableIncome } from './data'
 
 function App() {
@@ -38,7 +39,12 @@ function App() {
         >
           Expenses
         </button>
-
+        <button
+          className={activeTab === "savings" ? "active" : ""}
+          onClick={() => setActiveTab("savings")}
+        >
+          Savings
+        </button>
         <button
           className={activeTab === "ask" ? "active" : ""}
           onClick={() => setActiveTab("ask")}
@@ -51,6 +57,7 @@ function App() {
         {activeTab === "income" ? <Income onAction={refresh}/> : ""}
         {activeTab === "expenses" ? <ExpenditureForm onAction={refresh}/> : ""}
         {activeTab === "ask" ? <AskQuestionForm onAction={refresh}/> : ""}
+        {activeTab === "savings" ? <Savings onAction={refresh}/> : ""}
       </div>
 
       <div>
