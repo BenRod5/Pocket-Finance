@@ -36,13 +36,10 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
     function handleRecurring(entry){
         const data = loadData();
         let nextDate = new Date(entry.date);
-        const stopDate = new Date(entry.date);
-        stopDate.setMonth(stopDate.getMonth() + 12);
-
-        console.log("START DATE:", nextDate.toLocaleDateString('en-CA'));
-        console.log("STOP DATE:", stopDate.toLocaleDateString('en-CA'));
-
+        const today = new Date("2026-05-01");        
+        const stopDate = new Date("2026-07-01");
         const seriesID = entry.id;
+        if((nextDate.getMonth() == today.getMonth())){
             while (true) {
                 if (entry.repeatAmount === "weekly") {
                     nextDate.setDate(nextDate.getDate() + 7);
@@ -51,10 +48,10 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                 } else if (entry.repeatAmount === "monthly") {
                     nextDate.setMonth(nextDate.getMonth() + 1);
                 }
-            
+
                 const dateString = nextDate.toLocaleDateString('en-CA')
 
-
+                if (dateString.slice(0,7) > stopDate.toLocaleDateString('en-CA').slice(0,7)) break;
                 const newData = {
                     id: Date.now() + Math.random(),
                     seriesID: seriesID,
@@ -65,6 +62,11 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                     isRecurring: entry.isRecurring,
                     repeatAmount: entry.isRecurring ? entry.repeatAmount : null
                 }
+
+                data.expenditures.push(newData);
+
+                if (nextDate.getMonth() > stopDate.getMonth()) break;
+            }
                 data.expenditures.push(newData);
 
                 
@@ -79,10 +81,9 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
     function handleSubmit(e) //the function that is called when the form needs to be submitted
     {
         e.preventDefault();//preventDefault here stops the default page activity(reloading the page) before it can erase user data
-        const now = Date.now()
+        
         const newExpenditure = {//this should work instead
-                id: now,
-                seriesID: now,//newExpenditure is an object which takes attributes from the values written by the user in the form
+                id: Date.now(),//newExpenditure is an object which takes attributes from the values written by the user in the form
                 name: name,
                 amount: Number(amount),
                 date: date,
@@ -98,38 +99,28 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
                 if(editingID == "")
                 {//add a value as normal
                     const data = loadData();//creates a new data object in line with what is returned by loadData, (either a blank defualtData object, see data.js, or the users previously filled out localStorage, also originally a defaultData object)
-                    data.expenditures.push(newExpenditure);
+                    data.expenditures.push(newExpenditure);//pushes the new expenditure to the users data
+                    saveData(data);//saves the edited data to localStorage
+                    
 
-
-                    if(newExpenditure.isRecurring) {
-                        saveData(data)
+                    if(isRecurring) {
                         const updatedList = handleRecurring(newExpenditure);
                         setExpenditures(updatedList);
                     } else {
-                        saveData(data)
                         setExpenditures(data.expenditures);
                     }
+
+                    // Shows text after saving valid entry (Income/Expenses).
                     alert("Saved " + name + " (£" + amount + ") on " + date); //alerts the user as to the successful saving of their data.
                     if (onAction) onAction();
                 }
                 else
                 {
                     const data = loadData();
-                    
-                    data.expenditures = data.expenditures.map((item) => {
-                        if ( item.seriesID === editingID){
-                            return {
-                                ...item,
-                                name,
-                                amount: Number(amount),
-                                
-                                category,
-                                isRecurring,
-                                repeatAmount: isRecurring ? repeatAmount : null
-                            };
-                        }
-                        return item;
-                    });
+                    // data.expenditures.map((item) => ) //not sure how the map version works
+                    const filteredArray =   data.expenditures.filter((item) => item.id != editingID); //filter out the element we are looking to edit
+                    data.expenditures = filteredArray;
+                    data.expenditures.push(newExpenditure);//push a new object with the users desired values as decided above
                     saveData(data);//save the values
                     setExpenditures(data.expenditures);                    
                     if (onAction) onAction();
@@ -144,13 +135,38 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
        
 
         setName("");//I assume this sets the state values back to default again
-        setAmount(0);
+        setAmount("");
         setDate("");
         setCategory("necessity");
         setEditingID("");
         setIsRecurring(false);
         setRepeatAmount("monthly");
     }
+
+    function handleDelete(itemID)
+    {
+        const data = loadData();//loads user data
+        const filteredValues = data.expenditures.filter((item) => item.id!=itemID && (item.isRecurring && item.seriesID != itemID ));//filter out all values with ID == itemID
+        data.expenditures = filteredValues; //put the filtered expenditures back in the whole data object
+        saveData(data);//return all values - that one filtered out ID
+        setExpenditures(data.expenditures);//updating the expenditures state once saveData is called so the display adjusts
+        if (onAction) onAction();
+
+    }
+    
+    function handleEdit(itemID)
+    {//is called when the edit button is clicked in the expenditure list
+        const data = loadData();//loads user data from localStorage
+        const ourEntry = data.expenditures.find((item) => item.id ==itemID);//search the expenditures array for the ID equal to itemID
+        setEditingID(itemID);//fills in the form with values from the selected expenditure
+        setName(ourEntry.name);
+        setAmount(ourEntry.amount);
+        setCategory(ourEntry.category);
+        setDate(ourEntry.date); 
+        if (onAction) onAction();
+
+    }
+    const todayStr = new Date().toISOString().split('T')[0];
 
     function handleDelete(itemID)
     {

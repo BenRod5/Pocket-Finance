@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import IncomeGraph from './IncomeGraph';
+import { act, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
@@ -34,36 +33,42 @@ function App() {
         </button>
 
         <button
-          className={activeTab === "expenses" ? "active" : ""}
-          onClick={() => setActiveTab("expenses")}
+        className={activeTab === "expenses" ? "active" : ""}
+        onClick={() => setActiveTab("expenses")}
         >
           Expenses
         </button>
+
+        {/*savings*/}
         <button
-          className={activeTab === "savings" ? "active" : ""}
-          onClick={() => setActiveTab("savings")}
+        className={activeTab === "savings" ? "active" : ""}
+        onClick={() => setActiveTab("savings")}
         >
           Savings
         </button>
+
         <button
-          className={activeTab === "ask" ? "active" : ""}
+          className={activeTab ==="ask" ? "active" : ""}//don't wholly understand it but I can copy it from josh
           onClick={() => setActiveTab("ask")}
         >
           Ask
         </button>
+
       </div>
 
       <div>
-        {activeTab === "income" ? <Income onAction={refresh}/> : ""}
-        {activeTab === "expenses" ? <ExpenditureForm onAction={refresh}/> : ""}
-        {activeTab === "ask" ? <AskQuestionForm onAction={refresh}/> : ""}
-        {activeTab === "savings" ? <Savings onAction={refresh}/> : ""}
+        {activeTab === "income" ? <Income onAction={refresh}/> :""}
+        {activeTab === "expenses"?<ExpenditureForm onAction={refresh}/>: ""}
+        {activeTab === "ask" ? <AskQuestionForm onAction={refresh}/>: ""}
+        {activeTab === "savings" ? <Savings onAction={refresh}/>: ""}
       </div>
-
       <div>
-        <h2>Balance: £{balance}</h2>
-        <IncomeGraph key={refreshKey} /> 
+        <h2>
+          Balance: £{balance}
+      
+        </h2>
       </div>
+  
     </div>
   )
 }
