@@ -5,19 +5,19 @@ import heroImg from './assets/hero.png'
 import './App.css'
 import ExpenditureForm from './ExpenditureForm'
 import Income from './Income'
-import AskQuestionForm from  './AskQuestionForm.jsx'
-import { calculateExpendableIncome } from './data'
-
-// Savings import.
+import AskQuestionForm from './AskQuestionForm.jsx'
 import Savings from './Savings.jsx'
+import { calculateExpendableIncome } from './data'
 
 function App() {
   const [count, setCount] = useState(0)
   const [activeTab, setActiveTab] = useState("income");
   const [balance, setBalance] = useState(calculateExpendableIncome());
+  const [refreshKey, setRefreshKey] = useState(0); // 👈 NEW
 
   const refresh = () => {
-    setBalance(calculateExpendableIncome())
+    setBalance(calculateExpendableIncome());
+    setRefreshKey(prev => prev + 1); 
   }
 
   return (

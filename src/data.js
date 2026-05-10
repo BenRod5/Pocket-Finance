@@ -15,9 +15,10 @@ export const defaultData = { //defaultData shape for other files to use as a blu
     // category must be either "necessity" or "luxury", binary between one or the other
     // e.g. { id: 1, name: "Rent", amount: 500, date: "2026-04-01", category: "necessity" }
   ],
+  savings: [],
   savingsGoal: 0,       // amount user wants to save this month
   spendingMoney: 0,     // expendable income - savings goal
-  month: "2026-04"      // current month, in "YYYY-MM" format, sorry for the americanism it just makes more sense
+  month: Date.now()      // current month, in "YYYY-MM" format, sorry for the americanism it just makes more sense
 };
 
 // Call this to load data from localStorage
@@ -48,7 +49,14 @@ export function calculateExpendableIncome() {
       .reduce((sum, entry) => sum + entry.amount, 0);  
   const totalExpenditure = data.expenditures
       .filter(entry => entry.date <= todayStr)
-      .reduce((sum, entry) => sum + entry.amount, 0);  const expendableIncome = totalIncome - totalExpenditure;
+      .reduce((sum, entry) => sum + entry.amount, 0);
+      
+      const totalSavings = (data.savings || [])
+      .reduce((sum, goal) => sum + (goal.deposits || [])
+      .filter(d => d.date <= todayStr)
+      .reduce((s, d) => s + (parseFloat(d.amount) || 0), 0), 0);
+
+  const expendableIncome = totalIncome - totalExpenditure - totalSavings;
 
   return expendableIncome;
 

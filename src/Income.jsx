@@ -16,6 +16,7 @@ const Income = ({ onAction }) => {
 
 
 
+            const dateString = nextDate.toLocaleDateString('en-CA')
 
     function handleRecurring(entry){
         const data = loadData();

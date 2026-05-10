@@ -8,7 +8,7 @@ import {loadData, saveData,calculateExpendableIncome,} from './data.js'
 //plug in real spendingMoney, and savings goal values to make it make more sense
 //display graph
 //make it prettier
-//check for AI looking comments
+
 
  const checkAffordability = (purchaseValue, spendingMoney, savingsGoal, daysTillIncome) =>
         {//the function for determining the affordability of a purchase

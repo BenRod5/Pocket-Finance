@@ -67,6 +67,12 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
 
                 if (nextDate.getMonth() > stopDate.getMonth()) break;
             }
+                data.expenditures.push(newData);
+
+                
+
+                if (nextDate > stopDate ) break;
+            
         }
         saveData(data);
         return data.expenditures;
@@ -162,6 +168,35 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
     }
     const todayStr = new Date().toISOString().split('T')[0];
 
+    function handleDelete(itemID)
+    {
+        const data = loadData();//loads user data
+        const filteredValues = data.expenditures.filter((item) => item.id!==itemID && item.seriesID !== itemID );//filter out all values with ID == itemID
+        data.expenditures = filteredValues; //put the filtered expenditures back in the whole data object
+        saveData(data);//return all values - that one filtered out ID
+        setExpenditures(data.expenditures);//updating the expenditures state once saveData is called so the display adjusts
+        if (onAction) onAction();
+
+    }
+    
+    function handleEdit(itemID)
+    {//is called when the edit button is clicked in the expenditure list
+        const data = loadData();
+        const ourEntry = data.expenditures.find(
+            (item) => item.id === itemID
+        );
+
+        setEditingID(itemID);
+
+        setName(ourEntry.name || "");
+        setAmount(ourEntry.amount || 0);
+        setCategory(ourEntry.category || "necessity");
+        setDate(ourEntry.date || "");
+    
+        if (onAction) onAction();
+    }
+    const todayStr = new Date().toISOString().split('T')[0];
+
 
     return (
         <div className='container'>
@@ -217,7 +252,7 @@ function ExpenditureForm({ onAction }) { //the function containing all our form 
         </select>
         )}
 
-        <button className='container' onSubmit>Save Entry</button>
+        <button className='container' type="submit">Save Entry</button>
         <h4>Expenditure History</h4>{/*basically a copied over version of income history with some edit and delete button changes*/}
             <ul style={{ listStyle: 'none', padding: 0, maxHeight: '300px', overflowY: 'auto' }}>
                 
