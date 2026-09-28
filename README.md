@@ -2,7 +2,7 @@
 
 A budgeting web app for students. Track income, expenses and savings goals in one place, see the year at a glance, and ask it whether you can afford something before you buy it.
 
-Built in React by a team of four as a second-year Software Engineering group project at Lancaster University (April to May 2026). Everything runs in the browser and your data stays on your own machine.
+Built in React by a team of four as a second-year Software Engineering group project at Lancaster University (Jan to May 2026). Everything runs in the browser and your data stays on your own machine.
 
 ## Features
 
